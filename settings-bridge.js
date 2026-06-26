@@ -5,7 +5,7 @@
  * ligada a stats.audio / stats.music / stats.language + saveUserData().
  */
 (function () {
-  var SCENES = ['Settings', 'SettingsGame'];
+  var SCENES = ['Settings'];
   var LANGS = [
     { name: 'English',     flag: '\u{1F1EC}\u{1F1E7}', code: 'en' },
     { name: 'Italiano',    flag: '\u{1F1EE}\u{1F1F9}', code: 'it' },
@@ -118,8 +118,11 @@
 
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
+    // trava: nunca durante gameplay ou pause em jogo
+    var block = false;
+    try { block = gm.scene.isActive('Level') || gm.scene.isActive('LevelRelax') || gm.scene.isActive('SettingsGame'); } catch (e) {}
     var act = null;
-    for (var i = 0; i < SCENES.length; i++) { try { if (gm.scene.isActive(SCENES[i])) { act = SCENES[i]; break; } } catch (e) {} }
+    if (!block) for (var i = 0; i < SCENES.length; i++) { try { if (gm.scene.isActive(SCENES[i])) { act = SCENES[i]; break; } } catch (e) {} }
     if (act && !shown) show(act);
     else if (!act && shown) hide();
   }, 300);
