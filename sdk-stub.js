@@ -1,43 +1,48 @@
 /*
- * sdk-stub.js  -  STUB DE ESTUDO (offline)
+ * sdk-stub.js  -  STUB DE ESTUDO (offline)  v2
  * ------------------------------------------------------------------
- * O jogo trava na splash esperando o provedor de anuncios:
- *     await _azerionIntegrationSDK.onAdProviderLoaded()
- * Esse provedor (Azerion/GameDistribution) so carrega online, com dominio
- * autorizado. Local, ele nunca resolve -> jogo nao inicia.
+ * Substitui o SDK de anuncios (Azerion/GameDistribution) para o jogo
+ * rodar offline. O SDK real esta em /vendor para estudo.
  *
- * Este stub responde a QUALQUER metodo do SDK com uma Promise resolvida,
- * entao o gate de boot passa e os anuncios viram no-op. So pra estudo.
- * Para ver o SDK real, abra /vendor/azerion-integration-sdk.js
+ * Por que v2: o jogo usa o SDK de forma ANINHADA e MISTA:
+ *   - await _azerionIntegrationSDK[x]()            -> precisa Promise
+ *   - _azerionIntegrationSDK[obj].isAdPlaying()    -> metodo SINCRONO
+ *                                                     num sub-objeto,
+ *                                                     tem que devolver false
+ *     (o jogo faz: false === isAdPlaying() && resume();
+ *      se isAdPlaying() nao for false, o jogo nunca despausa)
+ *
+ * Solucao: um Proxy RECURSIVO e CHAMAVEL.
+ *   - acessar qualquer .propriedade  -> devolve outro proxy (objeto/func)
+ *   - CHAMAR como funcao             -> Promise resolvida (p/ os await)
+ *   - metodos de consulta booleana (is/has/can/should) -> false SINCRONO
+ * Assim funciona em qualquer profundidade, sem precisar saber os nomes.
  * ------------------------------------------------------------------
  */
 (function () {
-  const log = (...a) => console.log('%c[SDK-STUB]', 'color:#888', ...a);
+  console.log('%c[SDK-STUB v2]', 'color:#888', 'ativo - jogo offline, anuncios desativados.');
 
-  // Funcao que serve pra tudo: loga e resolve.
-  const noop = (name) => (...args) => {
-    log(name, args);
-    // showRewarded/showInterstitial: resolve "true" = anuncio visto (libera recompensa no estudo)
-    return Promise.resolve(true);
-  };
+  function makeProxy() {
+    var fn = function () {};
+    return new Proxy(fn, {
+      get: function (_t, prop) {
+        if (prop === 'then' || prop === 'catch' || prop === 'finally') return undefined;
+        if (typeof prop === 'symbol') return undefined;
+        var name = String(prop);
+        if (/^(is|has|can|should|was|are)/.test(name)) {
+          return function () { return false; };
+        }
+        return makeProxy();
+      },
+      apply: function () { return Promise.resolve(makeProxy()); }
+    });
+  }
 
-  // Proxy: qualquer propriedade acessada vira uma funcao segura.
-  const handler = {
-    get(_t, prop) {
-      if (prop === 'then') return undefined; // evita ser tratado como thenable
-      return noop(String(prop));
-    }
-  };
-
-  const stub = new Proxy({}, handler);
-
+  var stub = makeProxy();
   window._azerionIntegrationSDK = stub;
   window.azerionIntegrationSDK = stub;
 
-  // GD/MSStart as vezes sao checados; deixa stubs vazios pra nao dar ReferenceError.
   window.GD_OPTIONS = window.GD_OPTIONS || {};
   window.gdsdk = window.gdsdk || stub;
   window.$msstart = window.$msstart || stub;
-
-  log('carregado - jogo roda offline, anuncios desativados.');
 })();
