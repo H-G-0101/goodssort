@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shop Sorting 2 (Goods Sort) - Estudo</title>
+
+  <!-- CSS local (originalmente apontava p/ assets/style.css do CDN) -->
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="stylesheet" href="assets/css/aeria_ymenu.css" />
+  <link rel="icon" href="assets/favicon.ico" />
+
+  <!-- truque do jogo p/ pre-carregar a fonte inter -->
+  <div style="font-family:inter; position:absolute; left:-1000px; visibility:hidden;">.</div>
+
+  <!--
+    REMOVIDO p/ rodar offline:
+      - msstart SDK (https://assets.msn.com/...)  -> nao usado pelo jogo
+      - <link rel="manifest" ...gamedistribution> -> 404 local
+    SUBSTITUIDO:
+      - azerion-libs.js + azerion-integration-sdk.js -> sdk-stub.js (offline)
+        (os SDKs reais estao em /vendor para estudo)
+  -->
+  <script src="sdk-stub.js"></script>
+  <script src="libs/phaser.min.js" defer="true"></script>
+  <script defer="defer" src="game/shop-sorting-2.min.js"></script>
+</head>
+<body>
+  <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
+  <div id="app"><div id="game-container"></div></div>
+  <div id="loader"><div id="loaderR"></div></div>
+</body>
+</html>

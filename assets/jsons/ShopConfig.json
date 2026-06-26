@@ -1,0 +1,89 @@
+{
+  "backgrounds": {
+    "classic": {
+      "price":0
+    },
+    "berries": {
+      "price":100
+    },
+    "starry": {
+      "price":100
+    },
+    "brick": {
+      "price":100
+    },
+    "candy": {
+      "price":-100
+    },
+    "halfs": {
+      "price":100
+    },
+    "paper": {
+      "price":100
+    },
+    "wavy": {
+      "price":-100
+    },
+    "rombs": {
+      "price":1000
+    }
+  },
+  "products": {
+    "food": {
+      "price":0
+    },
+    "pastry": {
+      "price":1000
+    },
+    "pharmacy": {
+      "price":-100
+    },
+    "cleaning": {
+      "price":-100
+    }
+  },
+  "shelfs": {
+    "0": {
+      "price":0
+    },
+    "1": {
+      "price":-100
+    },
+    "2": {
+      "price":-1000
+    },
+    "3": {
+      "price":300
+    },
+    "4": {
+      "price":500
+    },
+    "5": {
+      "price":800
+    },
+    "6": {
+      "price":300
+    },
+    "7": {
+      "price":300
+    },
+    "8": {
+      "price":500
+    },
+    "9": {
+      "price":1000
+    },
+    "10": {
+      "price":800
+    },
+    "11": {
+      "price":800
+    },
+    "12": {
+      "price":800
+    },
+    "13": {
+      "price":800
+    }
+  }
+}

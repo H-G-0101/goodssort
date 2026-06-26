@@ -1,0 +1,586 @@
+{
+  "play": {
+    "en": "Play",
+    "de": "Spielen",
+    "es": "Jugar",
+    "fr": "Jouer",
+    "it": "Gioca",
+    "pl": "Graj"
+  },
+  "settings": {
+    "en": "Settings",
+    "de": "Einstellungen",
+    "es": "Ajustes",
+    "fr": "Paramètres",
+    "it": "Impostazioni",
+    "pl": "Ustawienia"
+  },
+  "resetProgressDes": {
+    "en": "ALL PROGRESS WILL BE ERASED",
+    "de": "DER GESAMTE FORTSCHRITT WIRD GELÖSCHT",
+    "es": "SE BORRARÁ EL PROGRESO AL COMPLETO",
+    "fr": "TOUS LES PROGRÈS SERONT PERDUS",
+    "it": "TUTTI I PROGRESSI SARANNO CANCELLATI",
+    "pl": "WSZYSTKIE POSTĘPY ZOSTANĄ USUNIĘTE"
+  },
+  "retry": {
+    "en": "Retry",
+    "de": "Wiederholen",
+    "es": "Reintentar",
+    "fr": "Réessayer",
+    "it": "Riprova",
+    "pl": "Powtórz"
+  },
+  "restart": {
+    "en": "Restart",
+    "de": "Neu starten",
+    "es": "Reiniciar",
+    "fr": "Recommencer",
+    "it": "Riavvia",
+    "pl": "Restart"
+  },
+  "pause": {
+    "en": "Pause",
+    "de": "Pause",
+    "es": "Pausa",
+    "fr": "Pause",
+    "it": "Pausa",
+    "pl": "Wstrzymaj"
+  },
+  "back": {
+    "en": "Back",
+    "de": "Zurück",
+    "es": "Volver",
+    "fr": "Retour",
+    "it": "Indietro",
+    "pl": "Wstecz"
+  },
+  "next": {
+    "en": "Next",
+    "de": "Weiter",
+    "es": "Siguiente",
+    "fr": "Suivant",
+    "it": "Avanti",
+    "pl": "Dalej"
+  },
+  "sound": {
+    "en": "Sound",
+    "de": "Ton",
+    "es": "Sonido",
+    "fr": "Son",
+    "it": "Suono",
+    "pl": "Dźwięk"
+  },
+  "music": {
+    "en": "Music",
+    "de": "Musik",
+    "es": "Música",
+    "fr": "Musique",
+    "it": "Musica",
+    "pl": "Muzyka"
+  },
+  "on": {
+    "en": "On",
+    "de": "Ein",
+    "es": "On",
+    "fr": "Activé",
+    "it": "On",
+    "pl": "Włącz"
+  },
+  "off": {
+    "en": "Off",
+    "de": "Aus",
+    "es": "Off",
+    "fr": "Désactivé",
+    "it": "Off",
+    "pl": "Wyłącz"
+  },
+  "yes": {
+    "en": "Yes",
+    "de": "Ja",
+    "es": "Sí",
+    "fr": "Oui",
+    "it": "Sì",
+    "pl": "Tak"
+  },
+  "no": {
+    "en": "No",
+    "de": "Nein",
+    "es": "No",
+    "fr": "Non",
+    "it": "No",
+    "pl": "Nie"
+  },
+  "ok": {
+    "en": "Ok",
+    "de": "Ok",
+    "es": "OK",
+    "fr": "Ok",
+    "it": "Ok",
+    "pl": "OK"
+  },
+  "reset": {
+    "en": "Reset",
+    "de": "Reset",
+    "es": "Poner a cero",
+    "fr": "Réinitialiser",
+    "it": "Resetta",
+    "pl": "Zresetuj"
+  },
+  "confirm": {
+    "en": "Are you sure?",
+    "de": "Bist du sicher?",
+    "es": "¿Seguro?",
+    "fr": "Es-tu sûr(e) ?",
+    "it": "Confermi?",
+    "pl": "Na pewno?"
+  },
+  "time is up": {
+    "en": "Time's up!",
+    "de": "Die Zeit ist abgelaufen!",
+    "es": "¡Se acabó el tiempo!",
+    "fr": "Temps écoulé !",
+    "it": "Tempo scaduto!",
+    "pl": "Czas minął!"
+  },
+  "you were close": {
+    "en": "You were close.",
+    "de": "Du warst nah dran.",
+    "es": "Has estado muy cerca.",
+    "fr": "Tu étais proche.",
+    "it": "C'è mancato poco.",
+    "pl": "Prawie się udało."
+  },
+  "offer time": {
+    "en": "Add some time?",
+    "de": "Zeit hinzufügen?",
+    "es": "¿Añadir más tiempo?",
+    "fr": "Ajouter un peu de temps ?",
+    "it": "Vuoi aggiungere tempo?",
+    "pl": "Dodać więcej czasu?"
+  },
+  "add time": {
+    "en": "+30 sec",
+    "de": "+30 Sek.",
+    "es": "+30 seg.",
+    "fr": "+30 sec",
+    "it": "+30 sec.",
+    "pl": "+30 sek."
+  },
+  "lv": {
+    "en": "LV.",
+    "de": "LV.",
+    "es": "NIV.",
+    "fr": "NV.",
+    "it": "LIV.",
+    "pl": "P."
+  },
+  "sec": {
+    "en": "Sec",
+    "de": "Sek",
+    "es": "Seg.",
+    "fr": "Sec",
+    "it": "Sec.",
+    "pl": "Sek."
+  },
+  "home": {
+    "en": "Home",
+    "de": "Start",
+    "es": "Inicio",
+    "fr": "Accueil",
+    "it": "Home",
+    "pl": "Start"
+  },
+  "continue": {
+    "en": "Continue",
+    "de": "Fortsetzen",
+    "es": "Continuar",
+    "fr": "Continuer",
+    "it": "Continua",
+    "pl": "Kontynuuj"
+  },
+  "sorry": {
+    "en": "Sorry something went wrong. Please try again.",
+    "de": "Tut uns leid etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "es": "Algo ha salido mal. Por favor prueba de nuevo.",
+    "fr": "Désolé quelque chose s'est mal passé. Réessaie.",
+    "it": "Ci dispiace qualcosa è andato storto. Ti preghiamo di riprovare.",
+    "pl": "Przepraszamy wystąpił błąd. Spróbuj ponownie."
+  },
+  "sure remove question": {
+    "en": "Are you sure? All progress will be lost.",
+    "de": "Bist du sicher? Der gesamte Fortschritt wird gelöscht.",
+    "es": "¿Seguro? Todo tu progreso se borrará.",
+    "fr": "Es-tu sûr(e) ? Tous les progrès seront perdus.",
+    "it": "Confermi? Tutti i progressi saranno cancellati.",
+    "pl": "Na pewno? Postępy zostaną utracone."
+  },
+  "play relax": {
+    "en": "No Timer",
+    "de": "Kein Timer",
+    "es": "Sin Tiempo",
+    "fr": "Sans Timer",
+    "it": "Senza timer",
+    "pl": "Bez timera"
+  },
+  "reward": {
+    "en": "Get reward",
+    "de": "Belohnung holen",
+    "es": "Obtener recompensa",
+    "fr": "Obtenir récompense",
+    "it": "Ottieni ricompensa",
+    "pl": "Zdobądź nagrodę"
+  },
+  "get": {
+    "en": "Get",
+    "de": "Holen",
+    "es": "Obtener",
+    "fr": "Obtenir",
+    "it": "Ottieni",
+    "pl": "Zdobądź"
+  },
+  "hint": {
+    "en": "Hint",
+    "de": "Hinweis",
+    "es": "Pista",
+    "fr": "Indice",
+    "it": "Hint",
+    "pl": "Tip"
+  },
+  "freeze": {
+    "en": "Freeze",
+    "de": "Anhalten",
+    "es": "Congelar",
+    "fr": "Geler",
+    "it": "Congela",
+    "pl": "Zatrzymaj"
+  },
+  "shuffle": {
+    "en": "Shuffle",
+    "de": "Mischen",
+    "es": "Revolver",
+    "fr": "Mélanger",
+    "it": "Mescola",
+    "pl": "Przetasuj"
+  },
+  "combo hint": {
+    "en": "Combo hint",
+    "de": "Combo-Hinweis",
+    "es": "Pista combo",
+    "fr": "Indice combo",
+    "it": "Suggerimento Combo",
+    "pl": "Podpowiedz kombinację"
+  },
+  "rearrange products": {
+    "en": "Rearrange products",
+    "de": "Produkte neu anordnen",
+    "es": "Reordenar productos",
+    "fr": "Réorganiser les produits",
+    "it": "Riorganizza prodotti",
+    "pl": "Poprzestawiaj produkty"
+  },
+  "freeze timer": {
+    "en": "Freeze timer",
+    "de": "Timer anhalten",
+    "es": "Detener tiempo",
+    "fr": "Geler le chrono",
+    "it": "Congela timer",
+    "pl": "Zatrzymaj stoper"
+  },
+  "shop": {
+    "en": "Shop",
+    "de": "Shop",
+    "es": "Tienda",
+    "fr": "Boutique",
+    "it": "Negozio",
+    "pl": "Kup"
+  },
+  "daily reward": {
+    "en": "Daily Reward",
+    "de": "Tägliche Belohnung",
+    "es": "Recompensa diaria",
+    "fr": "Récompense quotidienne",
+    "it": "Ricompensa giornaliera",
+    "pl": "Codzienna nagroda"
+  },
+  "ranking": {
+    "en": "Ranking",
+    "de": "Ranking",
+    "es": "Clasificación",
+    "fr": "Classement",
+    "it": "Ranking",
+    "pl": "Ranking"
+  },
+  "day": {
+    "en": "Day",
+    "de": "Tag",
+    "es": "Día",
+    "fr": "Jour",
+    "it": "Giorno",
+    "pl": "Dzień"
+  },
+  "collect": {
+    "en": "Collect",
+    "de": "Sammeln",
+    "es": "Recoger",
+    "fr": "Collecter",
+    "it": "Riscuoti",
+    "pl": "Zbierz"
+  },
+  "nothanks": {
+    "en": "No Thanks!",
+    "de": "Nein, danke!",
+    "es": "¡No, gracias!",
+    "fr": "Non merci !",
+    "it": "No, grazie!",
+    "pl": "Nie, dzięki!"
+  },
+  "score": {
+    "en": "Score",
+    "de": "Score",
+    "es": "Puntuación",
+    "fr": "Score",
+    "it": "Punteggio",
+    "pl": "Wynik"
+  },
+  "bonus": {
+    "en": "Bonus",
+    "de": "Bonus",
+    "es": "Bonus",
+    "fr": "Bonus",
+    "it": "Bonus",
+    "pl": "Bonus"
+  },
+  "double": {
+    "en": "Double",
+    "de": "Doppelt",
+    "es": "Doblar",
+    "fr": "Doubler",
+    "it": "Doppio",
+    "pl": "Podwojenie"
+  },
+  "time": {
+    "en": "Time",
+    "de": "Zeit",
+    "es": "Tiempo",
+    "fr": "Temps",
+    "it": "Tempo",
+    "pl": "Czas"
+  },
+  "level": {
+    "en": "Level",
+    "de": "Level",
+    "es": "Nivel",
+    "fr": "Niveau",
+    "it": "Livello",
+    "pl": "Poziom"
+  },
+  "coins": {
+    "en": "Coins",
+    "de": "Münzen",
+    "es": "Monedas",
+    "fr": "Pièces",
+    "it": "Monete",
+    "pl": "Monety"
+  },
+  "stars": {
+    "en": "Stars",
+    "de": "Sterne",
+    "es": "Estrellas",
+    "fr": "Étoiles",
+    "it": "Stelle",
+    "pl": "Gwiazdki"
+  },
+  "buy": {
+    "en": "Buy",
+    "de": "Kaufen",
+    "es": "Comprar",
+    "fr": "Acheter",
+    "it": "Acquista",
+    "pl": "Kup"
+  },
+  "background": {
+    "en": "Background",
+    "de": "Hintergrund",
+    "es": "Fondo",
+    "fr": "Arrière-plan",
+    "it": "Sfondo",
+    "pl": "Tło"
+  },
+  "set": {
+    "en": "Set",
+    "de": "Set",
+    "es": "Colocar",
+    "fr": "Définir",
+    "it": "Set",
+    "pl": "Ustaw"
+  },
+  "level cleared": {
+    "en": "Level Cleared!",
+    "de": "Level abgeschlossen!",
+    "es": "¡Nivel superado!",
+    "fr": "Niveau terminé !",
+    "it": "Livello completato!",
+    "pl": "Poziom ukończony!"
+  },
+  "player": {
+    "en": "Player",
+    "de": "Spieler",
+    "es": "Jugador",
+    "fr": "Joueur",
+    "it": "Giocatore",
+    "pl": "Gracz"
+  },
+  "great": {
+    "en": "You nailed it!",
+    "de": "Volltreffer!",
+    "es": "¡Lo has clavado!",
+    "fr": "Tu as réussi !",
+    "it": "Ce l'hai fatta!",
+    "pl": "Pełen sukces!"
+  },
+  "nice": {
+    "en": "Nicely done!",
+    "de": "Gut gemacht!",
+    "es": "¡Bien hecho!",
+    "fr": "Bien joué !",
+    "it": "Ben fatto!",
+    "pl": "Świetnie!"
+  },
+  "good job": {
+    "en": "Good job!",
+    "de": "Gute Arbeit!",
+    "es": "¡Buen trabajo!",
+    "fr": "Bravo !",
+    "it": "Ottimo lavoro!",
+    "pl": "Dobra robota!"
+  },
+  "well_done": {
+    "en": "Well done!",
+    "de": "Kudos!",
+    "es": "¡Bien hecho!",
+    "fr": "Félicitations !",
+    "it": "Complimenti!",
+    "pl": "Doskonale!"
+  },
+  "awesome": {
+    "en": "Awesome!",
+    "de": "Fantastisch!",
+    "es": "¡Impresionante!",
+    "fr": "Génial !",
+    "it": "Grandioso!",
+    "pl": "Fantastycznie!"
+  },
+  "tutorial 1": {
+    "en": "Move the product to the right shelf",
+    "de": "Bewege das Produkt ins rechte Regal",
+    "es": "Lleva el producto a la estantería correcta",
+    "fr": "Déplace le produit sur la bonne étagère",
+    "it": "Sposta il prodotto sullo scaffale di destra",
+    "pl": "Przenieś produkt na prawą półkę"
+  },
+  "tutorial 2": {
+    "en": "Nice! Now move the last product",
+    "de": "Super! Bewege jetzt das letzte Produkt",
+    "es": "¡Qué bien! Ahora lleva el último artículo",
+    "fr": "Super ! Maintenant déplace le dernier produit",
+    "it": "Fantastico! Ora sposta l'ultimo prodotto",
+    "pl": "Nieźle! Teraz przesuń ostatni produkt”"
+  },
+  "tutorial 3": {
+    "en": "Great job! Level is cleared!",
+    "de": "Tolle Arbeit! Das Level ist abgeschlossen!",
+    "es": "¡Gran trabajo! ¡Has superado el nivel!",
+    "fr": "Bien joué !Niveau terminé !",
+    "it": "Ottimo lavoro! Hai completato il livello!",
+    "pl": "Znakomicie! Poziom ukończony!"
+  },
+  "tutorial 4": {
+    "en": "If you want you can use boosters",
+    "de": "Wenn du möchtest kannst du Booster verwenden",
+    "es": "Si quieres puedes usar los potenciadores",
+    "fr": "Si tu veux tu peux utiliser des boosters",
+    "it": "Se vuoi puoi usare i booster",
+    "pl": "„Jeśli chcesz możesz użyć boosterów”"
+  },
+  "tutorial mix": {
+    "en": "This button mixes all visible tiles",
+    "de": "Mit diesem Button mischst du alle sichtbaren Kacheln",
+    "es": "Este botón mezcla todos los espacios visibles",
+    "fr": "Ce bouton mélange toutes les tuiles visibles",
+    "it": "Questo pulsante mescola tutte le tessere visibili",
+    "pl": "Ten przycisk miesza wszystkie widoczne płytki."
+  },
+  "tutorial freeze": {
+    "en": "This button freezes the timer for a few seconds",
+    "de": "Mit diesem Button kannst du den Timer einige Sekunden anhalten",
+    "es": "Este botón detiene el temporizador durante unos segundos",
+    "fr": "Ce bouton fige le chrono pendant quelques secondes",
+    "it": "Questo pulsante congela il timer per qualche secondo",
+    "pl": "Ten przycisk zatrzymuje stoper na kilka sekund."
+  },
+  "tutorial hint": {
+    "en": "This button highlights three free tiles",
+    "de": "Mit diesem Button kannst du drei freie Kacheln anzeigen",
+    "es": "Este botón resalta tres huecos libres",
+    "fr": "Ce bouton met en surbrillance trois tuiles libres",
+    "it": "Questo pulsante evidenzia tre piastrelle libere",
+    "pl": "Ten przycisk podświetla trzy wolne płytki"
+  },
+  "tutorial timer": {
+    "en": "And don't forget about timer!",
+    "de": "Und vergiss den Timer nicht!",
+    "es": "¡Y no te olvides del temporizador!",
+    "fr": "Et n'oublie pas le chrono !",
+    "it": "E non dimenticarti del timer!",
+    "pl": "I nie zapomnij o stoperze!"
+  },
+  "tutorial luck": {
+    "en": "That's it! Good luck!",
+    "de": "Das war's auch schon! Viel Erfolg!",
+    "es": "¡Eso es todo! ¡Buena suerte!",
+    "fr": "C'est tout !Bonne chance !",
+    "it": "È tutto! Buona fortuna!",
+    "pl": "I to wszystko! Powodzenia!"
+  },
+  "select": {
+    "en": "Select",
+    "de": "Wählen",
+    "es": "Seleccionar",
+    "fr": "Choisir",
+    "it": "Seleziona",
+    "pl": "Wybierz"
+  },
+  "watch an ad": {
+    "en": "Watch an ad\nto get coins",
+    "de": "Werbung ansehen\num Münzen zu erhalten",
+    "es": "Ver un anuncio\npara conseguir\nmonedas",
+    "fr": "Regarde la pub\npour gagner des\npièces",
+    "it": "Guarda annuncio\nper ottenere monete",
+    "pl": "Obejrzyj reklamę\naby zdobyć monety"
+  },
+  "skip tut": {
+    "en": "SKIP TUTORIAL",
+    "de": "TUTORIAL ÜBERSPRINGEN",
+    "es": "OMITIR TUTORIAL",
+    "fr": "PASSER LE TUTORIEL",
+    "it": "SALTA TUTORIAL",
+    "pl": "POMIŃ INSTRUKTAŻ"
+  },
+  "free this shelf": {
+    "en": "Clear this shelf to\nreveal the next row\nof items",
+    "de": "Räume dieses Regal\num die nächste Reihe\nvon Items zu enthüllen",
+    "es": "Vacía esta estantería para\nmostrar la siguiente fila \nde objetos",
+    "fr": "vide cette étagère pour\nrévéler la rangée suivante\nd'objets",
+    "it": "Libera questo scaffale per\nrivelare la fila successiva\ndi articoli",
+    "pl": "„Wyczyść ten poziom aby\nodsłonić następny rząd\nprzedmiotów”"
+  },
+  "no ads": {
+    "en": "No ad available",
+    "de": "Keine Werbung\nverfügbar",
+    "es": "No hay publi\ndisponible",
+    "fr": "Aucune pub disponible",
+    "it": "Nessun annuncio\ndisponibile",
+    "pl": "Brak dostępnych\nreklam"
+  }
+}
