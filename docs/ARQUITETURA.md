@@ -10,7 +10,7 @@ mudar níveis, textos e economia sem tocar no JavaScript.
 index.html
   └─ libs/phaser.min.js        (engine)
   └─ sdk-stub.js               (resolve o "gate" de anúncios)
-  └─ game/shop-sorting-2.min.js
+  └─ game/grocery-store.min.js
          │  no boot, o Phaser Loader busca, em paralelo:
          ├─ assets/atlases/*    (sprites empacotados: atlas + tiles + splash)
          ├─ assets/jsons/*      (configuração do jogo)

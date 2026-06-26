@@ -1,10 +1,10 @@
-# Shop Sorting 2 (Goods Sort) — Projeto de Estudo
+# Grocery Store — Projeto de Estudo
 
 Estrutura de um jogo HTML5 comercial reconstruída a partir de uma captura **HAR**
 (tráfego de rede), reorganizada para estudo de arquitetura de jogos.
 
 - **Engine:** Phaser 3 (`libs/phaser.min.js`)
-- **Jogo:** `game/shop-sorting-2.min.js` (minificado e **ofuscado** — lógica não legível)
+- **Jogo:** `game/grocery-store.min.js` (minificado e **ofuscado** — lógica não legível)
 - **Wrapper de anúncios:** Azerion / GameDistribution (em `vendor/`, substituído por stub local)
 - **Gênero:** puzzle de organização (sort/merge) por prateleiras
 
@@ -56,7 +56,7 @@ goods_sort_study/
 ├── libs/
 │   └── phaser.min.js       # engine
 ├── game/
-│   └── shop-sorting-2.min.js  # lógica do jogo (ofuscada)
+│   └── grocery-store.min.js  # lógica do jogo (ofuscada)
 ├── assets/
 │   ├── style.css
 │   ├── css/aeria_ymenu.css

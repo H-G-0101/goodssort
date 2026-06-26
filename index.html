@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+  <style>#loader{pointer-events:none}</style>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Shop Sorting 2 (Goods Sort) - Estudo</title>
+  <title>Grocery Store</title>
 
   <!-- CSS local (originalmente apontava p/ assets/style.css do CDN) -->
   <link rel="stylesheet" href="assets/style.css" />
@@ -21,13 +23,27 @@
       - azerion-libs.js + azerion-integration-sdk.js -> sdk-stub.js (offline)
         (os SDKs reais estao em /vendor para estudo)
   -->
-  <script src="sdk-stub.js"></script>
+  <script src="sdk-stub.js?v=21"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script defer="defer" src="game/shop-sorting-2.min.js"></script>
+  <script src="shop-bridge.js?v=21" defer="defer"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=21"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
   <div id="app"><div id="game-container"></div></div>
   <div id="loader"><div id="loaderR"></div></div>
+  <script>
+  /* remove o overlay #loader (spinner) quando o jogo aparece.
+     sem isso, ele fica por cima (z-index 99) e bloqueia o arrasto. */
+  (function(){
+    function gone(){ var l=document.getElementById('loader'); if(l) l.remove(); }
+    function ready(){
+      var c=document.querySelector('#game-container canvas')||document.querySelector('canvas');
+      if(c){ gone(); return true; } return false;
+    }
+    var iv=setInterval(function(){ if(ready()) clearInterval(iv); },200);
+    setTimeout(function(){ clearInterval(iv); gone(); },8000); // fallback
+  })();
+  </script>
 </body>
 </html>
