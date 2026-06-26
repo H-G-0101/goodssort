@@ -41,7 +41,7 @@
   ];
   var EMOJI = { products: '🛒', shelfs: '🗄️', backgrounds: '🖼️' };
 
-  var ui = null, shown = false, curTab = 0;
+  var ui = null, shown = false, curTab = 0, pausedKeys = [];
 
   // ---------- 2) overlay ----------
   function buildUI() {
@@ -173,18 +173,37 @@
     } catch (e) {}
   }
 
+  function capturePaused() {
+    pausedKeys = [];
+    try {
+      g().scene.scenes.forEach(function (sc) {
+        var key = sc && sc.sys && sc.sys.settings && sc.sys.settings.key;
+        if (key && key !== 'Shop' && g().scene.isPaused(key)) pausedKeys.push(key);
+      });
+    } catch (e) {}
+    console.log('[SHOP-BRIDGE] cenas pausadas ao abrir:', pausedKeys);
+  }
+
   function closeShop() {
     try {
-      var gm = g(), sc = gm.scene.getScene('Shop');
-      var fromWhere = sc && sc.whatToBuy && sc.whatToBuy.fromWhere;
-      hidePhaserShop(false);
-      gm.scene.stop('Shop');
-      if (fromWhere) gm.scene.resume(fromWhere);
+      var gm = g();
+      hidePhaserShop(false);            // restaura visibilidade da loja Phaser
+      try { gm.scene.stop('Shop'); } catch (e) {}
+      // resume as cenas que estavam pausadas quando a loja abriu (a de origem)
+      pausedKeys.forEach(function (k) { try { gm.scene.resume(k); } catch (e) {} });
+      // fallback: fromWhere da propria cena, se nada foi resumido
+      if (!pausedKeys.length) {
+        try {
+          var sc = gm.scene.getScene('Shop');
+          var fw = sc && sc.whatToBuy && sc.whatToBuy.fromWhere;
+          if (fw) gm.scene.resume(fw);
+        } catch (e) {}
+      }
     } catch (e) { console.warn('[SHOP-BRIDGE] close falhou', e); }
     hide();
   }
 
-  function show() { buildUI(); curTab = 0; render(); ui.style.display = 'flex'; shown = true; hidePhaserShop(true); }
+  function show() { buildUI(); curTab = 0; capturePaused(); render(); ui.style.display = 'flex'; shown = true; hidePhaserShop(true); }
   function hide() { if (ui) ui.style.display = 'none'; shown = false; }
 
   // ---------- detectar a cena Shop ----------
