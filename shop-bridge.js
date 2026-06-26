@@ -207,11 +207,25 @@
   function hide() { if (ui) ui.style.display = 'none'; shown = false; }
 
   // ---------- detectar a cena Shop ----------
+  var hooked = false;
+  function tryHook() {
+    if (hooked) return;
+    try {
+      var sc = g().scene.getScene('Shop');
+      if (sc && sc.events) {
+        var h = function () { try { sc.sys.setVisible(false); } catch (e) {} };
+        sc.events.on('start', h);
+        sc.events.on('wake', h);
+        hooked = true;
+      }
+    } catch (e) {}
+  }
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
+    tryHook();
     var active = false;
     try { active = gm.scene.isActive('Shop'); } catch (e) {}
     if (active && !shown) show();
     else if (!active && shown) hide();
-  }, 300);
+  }, 30);
 })();

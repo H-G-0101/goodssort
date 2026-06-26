@@ -92,13 +92,28 @@
   function show() { buildUI(); render(); ui.style.display = 'flex'; shown = true; hidePhaser(true); }
   function hide() { if (ui) ui.style.display = 'none'; shown = false; }
 
+  var hooked = false;
+  function tryHook() {
+    if (hooked) return;
+    try {
+      var sc = g().scene.getScene('SettingsGame');
+      if (sc && sc.events) {
+        var h = function () { try { sc.sys.setVisible(false); } catch (e) {} };
+        sc.events.on('start', h);
+        sc.events.on('wake', h);
+        hooked = true;
+      }
+    } catch (e) {}
+  }
+
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
+    tryHook();
     var active = false;
     try { active = gm.scene.isActive('SettingsGame'); } catch (e) {}
     if (active && !shown) show();
     else if (!active && shown) hide();
-  }, 250);
+  }, 30);
 
   console.log('%c[PAUSE-BRIDGE]', 'color:#5246c4', 'ativo (SettingsGame).');
 })();
