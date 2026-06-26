@@ -1,11 +1,9 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <style>#loader{pointer-events:none}</style>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DEBUG - Grocery Store</title>
+  <title>DEBUG - Goods Sort</title>
   <link rel="stylesheet" href="assets/style.css" />
   <link rel="stylesheet" href="assets/css/aeria_ymenu.css" />
 
@@ -76,26 +74,12 @@
   })();
   </script>
 
-  <script src="sdk-stub.js?v=18"></script>
+  <script src="sdk-stub.js"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="shop-bridge.js?v=18" defer="defer"></script>
-  <script defer="defer" src="game/grocery-store.min.js?v=18"></script>
+  <script defer="defer" src="game/shop-sorting-2.min.js"></script>
 </head>
 <body>
   <div id="app"><div id="game-container"></div></div>
   <div id="loader"><div id="loaderR"></div></div>
-  <script>
-  /* remove o overlay #loader (spinner) quando o jogo aparece.
-     sem isso, ele fica por cima (z-index 99) e bloqueia o arrasto. */
-  (function(){
-    function gone(){ var l=document.getElementById('loader'); if(l) l.remove(); }
-    function ready(){
-      var c=document.querySelector('#game-container canvas')||document.querySelector('canvas');
-      if(c){ gone(); return true; } return false;
-    }
-    var iv=setInterval(function(){ if(ready()) clearInterval(iv); },200);
-    setTimeout(function(){ clearInterval(iv); gone(); },8000); // fallback
-  })();
-  </script>
 </body>
 </html>
