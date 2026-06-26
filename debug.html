@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DEBUG - Goods Sort</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="stylesheet" href="assets/css/aeria_ymenu.css" />
+
+  <!-- ===== DIAGNOSTICO (precisa rodar ANTES de tudo) ===== -->
+  <style>
+    #dbg{position:fixed;top:0;left:0;right:0;max-height:55vh;overflow:auto;
+      z-index:999999;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.45 monospace;
+      padding:6px 8px;border-bottom:2px solid #0f0;white-space:pre-wrap}
+    #dbg .e{color:#ff5252}#dbg .w{color:#ffb300}#dbg .ok{color:#69f0ae}#dbg .h{color:#fff;font-weight:bold}
+  </style>
+  <script>
+  (function(){
+    var box;
+    function out(cls,msg){ if(!box){box=document.getElementById('dbg');}
+      var d=document.createElement('div'); if(cls)d.className=cls; d.textContent=msg;
+      (box||document.body).appendChild(d); }
+    window.__dbg=out;
+    document.addEventListener('DOMContentLoaded',function(){
+      var b=document.createElement('div'); b.id='dbg';
+      b.innerHTML='<div class="h">== DIAGNOSTICO == (mande print desta faixa)</div>';
+      document.body.insertBefore(b,document.body.firstChild); box=b;
+      flush();
+    });
+    var pending=[];
+    function flush(){ if(box){ pending.forEach(function(a){out(a[0],a[1])}); pending=[]; } }
+    function log(cls,msg){ if(box)out(cls,msg); else pending.push([cls,msg]); }
+
+    // erros JS
+    window.addEventListener('error',function(ev){
+      if(ev.target&&(ev.target.src||ev.target.href)){
+        log('e','[ASSET FALHOU] '+(ev.target.src||ev.target.href));
+      } else {
+        log('e','[JS ERROR] '+ev.message+'  @'+(ev.filename||'')+':'+(ev.lineno||''));
+      }
+    },true);
+    window.addEventListener('unhandledrejection',function(ev){
+      log('e','[PROMISE REJEITADA] '+(ev.reason&&ev.reason.message?ev.reason.message:ev.reason));
+    });
+
+    // XHR (Phaser carrega json/atlas/audio por XHR)
+    var O=XMLHttpRequest.prototype.open, S=XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open=function(m,u){ this.__u=u; return O.apply(this,arguments); };
+    XMLHttpRequest.prototype.send=function(){
+      var x=this,u=x.__u;
+      x.addEventListener('loadend',function(){
+        var s=x.status;
+        if(s>=200&&s<300) log('ok','[XHR '+s+'] '+u);
+        else log('e','[XHR '+ (s||'ERR') +'] '+u);
+      });
+      return S.apply(this,arguments);
+    };
+    // fetch
+    var F=window.fetch;
+    if(F)window.fetch=function(u){ var url=(u&&u.url)||u;
+      return F.apply(this,arguments).then(function(r){
+        log(r.ok?'ok':'e','[FETCH '+r.status+'] '+url); return r;
+      }).catch(function(e){ log('e','[FETCH ERRO] '+url+' :: '+e.message); throw e; });
+    };
+    // Audio/Image diretos
+    var AU=window.Audio;
+    if(AU)window.Audio=function(src){ var a=new AU(src);
+      if(src)a.addEventListener('error',function(){log('e','[AUDIO FALHOU] '+src)});
+      return a; };
+
+    log('h','overlay armado. carregando jogo...');
+    // resumo apos 12s
+    setTimeout(function(){ log('w','--- 12s: se acima houver linha vermelha [XHR 404]/[AUDIO], esse arquivo eh o problema ---'); },12000);
+  })();
+  </script>
+
+  <script src="sdk-stub.js"></script>
+  <script src="libs/phaser.min.js" defer="true"></script>
+  <script defer="defer" src="game/shop-sorting-2.min.js"></script>
+</head>
+<body>
+  <div id="app"><div id="game-container"></div></div>
+  <div id="loader"><div id="loaderR"></div></div>
+</body>
+</html>

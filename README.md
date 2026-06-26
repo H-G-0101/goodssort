@@ -78,3 +78,26 @@ goods_sort_study/
 
 Veja **`docs/ARQUITETURA.md`** para a parte que interessa no estudo: como níveis,
 localização e economia são definidos por dados (data-driven).
+
+---
+
+## Publicar no GitHub Pages
+
+1. Crie o repositório e suba tudo (inclusive o arquivo `.nojekyll`):
+   ```bash
+   git init
+   git add .
+   git commit -m "goods sort - estudo"
+   git branch -M main
+   git remote add origin https://github.com/SEU_USUARIO/SEU_REPO.git
+   git push -u origin main
+   ```
+2. No GitHub: **Settings > Pages > Branch: `main` / root** > Save.
+3. Acesse `https://SEU_USUARIO.github.io/SEU_REPO/` (leva ~1 min no 1o deploy).
+
+Os caminhos são relativos, então funciona em subpasta (`/SEU_REPO/`) sem ajuste.
+O `.nojekyll` evita o Jekyll mexer nos arquivos.
+
+> Lembrete: é código/asset comercial de terceiros. Um repo público = redistribuição.
+> Para estudo, prefira repo **privado** (o Pages ainda gera URL acessível, mas você
+> não divulga) ou teste só local com `./serve.sh`.
