@@ -116,8 +116,23 @@
   function show(key) { activeScene = key; buildUI(); capturePaused(); render(); ui.style.display = 'flex'; shown = true; hidePhaser(true); }
   function hide() { if (ui) ui.style.display = 'none'; shown = false; }
 
+  var hooked = false;
+  function tryHook() {
+    if (hooked) return;
+    try {
+      var sc = g().scene.getScene('Settings');
+      if (sc && sc.events) {
+        var h = function () { try { sc.sys.setVisible(false); } catch (e) {} };
+        sc.events.on('start', h);
+        sc.events.on('wake', h);
+        hooked = true;
+      }
+    } catch (e) {}
+  }
+
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
+    tryHook();
     // trava: nunca durante gameplay ou pause em jogo
     var block = false;
     try { block = gm.scene.isActive('Level') || gm.scene.isActive('LevelRelax') || gm.scene.isActive('SettingsGame'); } catch (e) {}
@@ -125,7 +140,7 @@
     if (!block) for (var i = 0; i < SCENES.length; i++) { try { if (gm.scene.isActive(SCENES[i])) { act = SCENES[i]; break; } } catch (e) {} }
     if (act && !shown) show(act);
     else if (!act && shown) hide();
-  }, 300);
+  }, 30);
 
   console.log('%c[SETTINGS-BRIDGE]', 'color:#8a5a2c', 'ativo (bandeiras).');
 })();
