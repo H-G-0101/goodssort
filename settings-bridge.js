@@ -127,7 +127,7 @@
 
   function show(key) {
     activeScene = key; buildUI(); firstRun = isFirstRun(); capturePaused(); render();
-    try { ui.querySelector('#sbg-del').style.display = firstRun ? 'none' : ''; } catch (e) {}
+    try { ui.querySelector('#sbg-del').style.display = ''; } catch (e) {}
     ui.style.display = 'flex'; shown = true; hidePhaser(true);
   }
   function hide() { if (ui) ui.style.display = 'none'; shown = false; }
