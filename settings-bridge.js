@@ -122,7 +122,7 @@
     try {
       var sc = g().scene.getScene('Settings');
       if (sc && sc.events) {
-        var h = function () { try { sc.sys.setVisible(false); } catch (e) {} };
+        var h = function () { try { if (g().scene.isPaused('Menu')) sc.sys.setVisible(false); } catch (e) {} };
         sc.events.on('start', h);
         sc.events.on('wake', h);
         hooked = true;
@@ -133,13 +133,12 @@
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
     tryHook();
-    // trava: nunca durante gameplay ou pause em jogo
-    var block = false;
-    try { block = gm.scene.isActive('Level') || gm.scene.isActive('LevelRelax') || gm.scene.isActive('SettingsGame'); } catch (e) {}
-    var act = null;
-    if (!block) for (var i = 0; i < SCENES.length; i++) { try { if (gm.scene.isActive(SCENES[i])) { act = SCENES[i]; break; } } catch (e) {} }
-    if (act && !shown) show(act);
-    else if (!act && shown) hide();
+    // so mostra quando o settings foi aberto pelo botao (Menu pausado),
+    // NUNCA no primeiro acesso (firstLoad faz stop()+launch sem pausar o Menu)
+    var ok = false;
+    try { ok = gm.scene.isActive('Settings') && gm.scene.isPaused('Menu'); } catch (e) {}
+    if (ok && !shown) show('Settings');
+    else if (!ok && shown) hide();
   }, 30);
 
   console.log('%c[SETTINGS-BRIDGE]', 'color:#8a5a2c', 'ativo (bandeiras).');
