@@ -17,10 +17,11 @@
     { name: 'Chinese',     flag: '\u{1F1E8}\u{1F1F3}', code: 'zh' }
   ];
 
-  var ui = null, shown = false, pausedKeys = [], activeScene = null;
+  var ui = null, shown = false, pausedKeys = [], activeScene = null, firstRun = false;
 
   function g() { return window.__game; }
   function stats() { try { return g().data.stats; } catch (e) { return null; } }
+  function isFirstRun() { try { return g().data.stats.firstLoad === true; } catch (e) { return false; } }
   function save() {
     try { if (g() && typeof g().saveUserData === 'function') { g().saveUserData(); return; } } catch (e) {}
     try { localStorage.setItem('grocery-store_sgk', JSON.stringify(g().data)); } catch (e) {}
@@ -107,13 +108,28 @@
     try {
       var gm = g();
       hidePhaser(false);
-      try { gm.scene.stop(activeScene); } catch (e) {}
-      pausedKeys.forEach(function (k) { try { gm.scene.resume(k); } catch (e) {} });
+      if (firstRun) {
+        // primeiro acesso: marca firstLoad=false e vai pro tutorial (igual ao nativo)
+        try { gm.scene.stop('Settings'); } catch (e) {}
+        try {
+          var lt = gm.scene.getScene('LevelTutorial');
+          if (lt && lt.scene) { try { gm.scene.resume('LevelTutorial'); } catch (e) {} lt.scene.restart(); }
+          else { gm.scene.start('LevelTutorial'); }
+        } catch (e) {}
+        var st = stats(); if (st) { st.firstLoad = false; save(); }
+      } else {
+        try { gm.scene.stop(activeScene); } catch (e) {}
+        pausedKeys.forEach(function (k) { try { gm.scene.resume(k); } catch (e) {} });
+      }
     } catch (e) { console.warn('[SETTINGS-BRIDGE] close', e); }
     hide();
   }
 
-  function show(key) { activeScene = key; buildUI(); capturePaused(); render(); ui.style.display = 'flex'; shown = true; hidePhaser(true); }
+  function show(key) {
+    activeScene = key; buildUI(); firstRun = isFirstRun(); capturePaused(); render();
+    try { ui.querySelector('#sbg-del').style.display = firstRun ? 'none' : ''; } catch (e) {}
+    ui.style.display = 'flex'; shown = true; hidePhaser(true);
+  }
   function hide() { if (ui) ui.style.display = 'none'; shown = false; }
 
   var hooked = false;
@@ -122,7 +138,7 @@
     try {
       var sc = g().scene.getScene('Settings');
       if (sc && sc.events) {
-        var h = function () { try { if (g().scene.isPaused('Menu')) sc.sys.setVisible(false); } catch (e) {} };
+        var h = function () { try { if (g().scene.isPaused('Menu') || isFirstRun()) sc.sys.setVisible(false); } catch (e) {} };
         sc.events.on('start', h);
         sc.events.on('wake', h);
         hooked = true;
@@ -133,10 +149,9 @@
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
     tryHook();
-    // so mostra quando o settings foi aberto pelo botao (Menu pausado),
-    // NUNCA no primeiro acesso (firstLoad faz stop()+launch sem pausar o Menu)
+    // mostra quando aberto pelo botao (Menu pausado) OU no primeiro acesso (firstLoad)
     var ok = false;
-    try { ok = gm.scene.isActive('Settings') && gm.scene.isPaused('Menu'); } catch (e) {}
+    try { ok = gm.scene.isActive('Settings') && (gm.scene.isPaused('Menu') || isFirstRun()); } catch (e) {}
     if (ok && !shown) show('Settings');
     else if (!ok && shown) hide();
   }, 30);
