@@ -17,7 +17,14 @@
     try { localStorage.setItem('grocery-store_sgk', JSON.stringify(g().data)); } catch (e) {}
   }
   function scene() { try { return g().scene.getScene('PlusCoins'); } catch (e) { return null; } }
-  function caller() { try { var sc = scene(); return sc && sc.fromWhere && sc.fromWhere.scene && sc.fromWhere.scene.key; } catch (e) { return null; } }
+  function caller() {
+    var sc = scene(); if (!sc) return null;
+    var fw = sc.fromWhere;
+    if (typeof fw === 'string') return fw;                      // alguns callers passam a string direto
+    if (fw && typeof fw.scene === 'string') return fw.scene;    // Menu passa {scene:"Menu",...}
+    if (fw && fw.scene && fw.scene.key) return fw.scene.key;
+    return null;
+  }
   function coins() { var st = stats(); return st ? (st.coins || 0) : 0; }
   function hidePhaser(hideIt) { try { var sc = scene(); if (sc && sc.sys && sc.sys.setVisible) sc.sys.setVisible(!hideIt); } catch (e) {} }
 
@@ -80,8 +87,17 @@
   function renderBalance() { if (ui) ui.querySelector('#pcb-balance').textContent = coins(); }
 
   function close() {
-    try { var gm = g(), ck = caller(); hidePhaser(false); gm.scene.stop('PlusCoins'); if (ck) gm.scene.resume(ck); }
-    catch (e) { console.warn('[PLUSCOINS-BRIDGE] close', e); }
+    try {
+      var gm = g(), sc = scene(), ck = caller();
+      hidePhaser(false);
+      try { if (sc && typeof sc.resumedPreviousScene === 'function') sc.resumedPreviousScene(); } catch (e) {}
+      gm.scene.stop('PlusCoins');
+      if (ck) {
+        try { gm.scene.resume(ck); } catch (e) {}
+        var cs = gm.scene.getScene(ck);
+        if (cs && typeof cs.updateInfo === 'function') { try { cs.updateInfo(); } catch (e) {} }
+      }
+    } catch (e) { console.warn('[PLUSCOINS-BRIDGE] close', e); }
     hide();
   }
   function show() { build(); renderBalance(); ui.style.display = 'flex'; shown = true; hidePhaser(true); }
