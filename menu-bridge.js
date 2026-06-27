@@ -1,8 +1,8 @@
 /*
- * menu-bridge.js  -  mostra o NIVEL ATUAL no botao Play (home)
- * O botao Play e o "commonButton" (cena Menu), um wrapper com .container (Phaser Container)
- * e .image (o triangulo). Adiciono um texto "Level N" dentro do container, abaixo do triangulo.
- * N = stats.currentCommonLevel (o nivel que vai ser jogado). Atualiza sozinho.
+ * menu-bridge.js  -  substitui a legenda "Play" pelo NIVEL ATUAL ("Level N")
+ * O botao Play e o "commonButton" (cena Menu). O jogo cria a legenda "Play" via
+ * addTextFit, guardada em commonButton.textObject. Reuso esse mesmo objeto e troco
+ * o texto pra "Level N" (mantem cor/contorno/fonte do original). N = currentCommonLevel.
  */
 (function () {
   function g() { return window.__game; }
@@ -17,23 +17,25 @@
 
   function tick() {
     var menu = menuActive(); if (!menu) return;
-    var btn = menu.commonButton; if (!btn || !btn.container) return;
+    var btn = menu.commonButton; if (!btn) return;
+    var to = btn.textObject; if (!to || !to.scene) return;     // a legenda "Play"
     var label = 'Level ' + levelNum();
-    // ja existe e valido -> so atualiza
-    if (btn.__lvlText && btn.__lvlText.scene) { try { btn.__lvlText.setText(label); } catch (e) { btn.__lvlText = null; } if (btn.__lvlText) return; }
+    if (to.text === label && btn.__lvlDone) return;            // ja trocado
+
+    // guarda a escala original da legenda (1a vez) pra usar de base
+    if (typeof btn.__baseScale !== 'number') btn.__baseScale = (typeof to.scaleX === 'number' && to.scaleX) ? to.scaleX : 0.42;
+    var base = btn.__baseScale;
     try {
-      var img = btn.image;
-      var oy = (img && img.displayHeight) ? (img.displayHeight * 0.5 + 30) : 78;
-      var t = menu.add.text(0, oy, label, {
-        fontFamily: 'inter', fontSize: '44px', color: '#ffffff',
-        stroke: '#4438ad', strokeThickness: 9, align: 'center'
-      }).setOrigin(0.5);
-      t.setScale(1);
-      btn.container.add(t);
-      btn.__lvlText = t;
+      to.setText(label);
+      to.setScale(base);
+      // encolhe se "Level N" ficar mais largo que o botao
+      var maxW = (btn.image && btn.image.displayWidth ? btn.image.displayWidth : 185) * 0.82;
+      var dw = to.displayWidth;
+      if (dw > maxW && dw > 0) to.setScale(base * maxW / dw);
+      btn.__lvlDone = true;
     } catch (e) { console.warn('[MENU-BRIDGE]', e); }
   }
 
-  setInterval(tick, 200);
-  console.log('%c[MENU-BRIDGE]', 'color:#5246c4', 'ativo (nivel no Play).');
+  setInterval(tick, 120);
+  console.log('%c[MENU-BRIDGE]', 'color:#5246c4', 'ativo (Play -> Level N).');
 })();
