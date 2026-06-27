@@ -11,6 +11,35 @@
     { bg: '#cd7f32', rA: '#5246c4', rB: '#7a6ee0' }   // 3o bronze
   ];
 
+  // ===== BOTS (nomes + pontuacao) - edite a vontade =====
+  var BOTS = [
+    { name: 'Maya',  score: 48500 },
+    { name: 'Leo',   score: 44200 },
+    { name: 'Nova',  score: 41800 },
+    { name: 'Kai',   score: 39500 },
+    { name: 'Ruby',  score: 37100 },
+    { name: 'Zane',  score: 35400 },
+    { name: 'Mochi', score: 33800 },
+    { name: 'Pixel', score: 31600 },
+    { name: 'Luna',  score: 29900 },
+    { name: 'Ace',   score: 28200 },
+    { name: 'Coco',  score: 26500 },
+    { name: 'Bolt',  score: 24800 },
+    { name: 'Mia',   score: 23100 },
+    { name: 'Finn',  score: 21400 },
+    { name: 'Sky',   score: 19700 },
+    { name: 'Duke',  score: 18000 },
+    { name: 'Ivy',   score: 16300 },
+    { name: 'Tiger', score: 14600 },
+    { name: 'Kiki',  score: 12900 },
+    { name: 'Max',   score: 11200 },
+    { name: 'Bee',   score: 9500 },
+    { name: 'Jax',   score: 7800 },
+    { name: 'Pepe',  score: 6100 },
+    { name: 'Tofu',  score: 4400 },
+    { name: 'Remy',  score: 2700 }
+  ];
+
   var ui = null, shown = false, hooked = false;
 
   function g() { return window.__game; }
@@ -20,8 +49,7 @@
   function fmt(n) { try { return Number(n).toLocaleString('pt-BR'); } catch (e) { return '' + n; } }
 
   function buildList() {
-    var rows = [];
-    try { rows = (g().rankingList || []).map(function (x) { return { name: x.name, score: x.score, me: false }; }); } catch (e) {}
+    var rows = BOTS.map(function (x) { return { name: x.name, score: x.score, me: false }; });
     var st = stats();
     rows.push({ name: PLAYER_NAME, score: (st && st.score) || 0, me: true });
     rows.sort(function (a, b) { return b.score - a.score; });
@@ -41,7 +69,7 @@
           '<span style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:' + m.bg + ';border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,0.25);font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,0.3);">' + r.rank + '</span>' +
         '</span>';
     } else {
-      badge = '<span style="font-weight:800;font-size:21px;color:#5a4a3a;">#' + r.rank + '</span>';
+      badge = '<span style="font-weight:800;font-size:21px;color:#5a4a3a;">' + r.rank + '</span>';
     }
     var rowBg = r.me ? 'linear-gradient(#bfe9cf,#a9e0c0)' : 'linear-gradient(#d7cbf3,#c9bced)';
     var rowBd = r.me ? '2px solid #3fae74' : '1.5px solid rgba(255,255,255,0.55)';
