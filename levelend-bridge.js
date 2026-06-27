@@ -7,6 +7,7 @@
 (function () {
   var winUI = null, lostUI = null, shown = false, cycleTimer = null, cycleIdx = 0, applied = false;
   var OPTIONS = [2, 3, 4, 5, 6, 7];
+  var ADD_SECONDS = 30;   // tempo que o ad do "Time's up" adiciona (e mostra no modal)
 
   function g() { return window.__game; }
   function stats() { try { return g().data.stats; } catch (e) { return null; } }
@@ -19,7 +20,7 @@
   function result() { var lc = levelConfig(); return lc && lc.result; }
   function isLost() { return result() === 'lost'; }
   function rewardAmount() { var sc = scene(); return (sc && typeof sc.rewardAmount === 'number') ? sc.rewardAmount : 0; }
-  function rewardSeconds() { try { var v = g().GlobalVariables.RewardTimeInSeconds; return (typeof v === 'number') ? v : 15; } catch (e) { return 15; } }
+  function rewardSeconds() { return ADD_SECONDS; }
   function mode() { var lc = levelConfig(); return (lc && lc.mode) ? lc.mode : 'Level'; }
   function hidePhaser(hideIt) { try { var sc = scene(); if (sc && sc.sys && sc.sys.setVisible) sc.sys.setVisible(!hideIt); } catch (e) {} }
 
@@ -160,8 +161,25 @@
   }
   function renderLost() { lostUI.querySelector('#lebg-secs').textContent = '+' + rewardSeconds() + ' Sec.'; }
   function onAddTime() {
-    // Offline (sem ad real): reinicia o nivel com tempo cheio. Trocar por CiDi rewarded + retomar com +tempo.
-    goRestart();
+    // continua o MESMO tabuleiro com +ADD_SECONDS (reverte o setLost): soma tempo,
+    // GAMESTATE='play', reabilita input, fecha LevelEnd. O update() retoma a contagem.
+    // OFFLINE: ad e sucesso imediato. Trocar por CiDi rewarded -> so continuar no sucesso.
+    try {
+      var gm = g(), m = mode();
+      var lvl = gm.scene.getScene(m);
+      var lm = lvl && lvl.LevelManager;
+      if (lm && lm.timer) {
+        lm.timer.timeLeft = (lm.timer.timeLeft || 0) + ADD_SECONDS;
+        if (typeof lm.timer.updateTime === 'function') lm.timer.updateTime();
+        lm.GAMESTATE = 'play';
+        try { lm.scene.input.enabled = true; } catch (e) {}
+        hidePhaser(false);
+        try { gm.scene.stop('LevelEnd'); } catch (e) {}
+        hide();
+        return;
+      }
+    } catch (e) { console.warn('[LEVELEND-BRIDGE] addTime', e); }
+    goRestart(); // fallback se nao achar o timer
   }
 
   /* ---------- hook anti-flash + ciclo ---------- */
