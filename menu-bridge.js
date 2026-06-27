@@ -15,9 +15,17 @@
     try { return g().scene.isActive('Menu') ? g().scene.getScene('Menu') : null; } catch (e) { return null; }
   }
 
+  var BTN_TEX = 'b-normal';   // botao comprido (mesma borda roxa); troque por 'b-big-normal' (sem borda) se quiser
+  var BTN_SCALE = 1.1;        // tamanho do botao (1.1 ~ 493x174). aumente/diminua a gosto
+
   function tick() {
     var menu = menuActive(); if (!menu) return;
     var btn = menu.commonButton; if (!btn) return;
+    // alonga o botao (troca a textura uma vez)
+    if (!btn.__widened && btn.image) {
+      try { btn.image.setTexture(btn.atlas || 'atlas', BTN_TEX).setScale(BTN_SCALE); btn.__widened = true; }
+      catch (e) { console.warn('[MENU-BRIDGE] tex', e); }
+    }
     var to = btn.textObject; if (!to || !to.scene) return;     // a legenda "Play"
     var label = 'Level ' + levelNum();
     if (to.text === label && btn.__lvlDone) return;            // ja trocado
