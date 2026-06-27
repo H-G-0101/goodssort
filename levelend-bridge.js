@@ -169,7 +169,7 @@
       var lvl = gm.scene.getScene(m);
       var lm = lvl && lvl.LevelManager;
       if (lm && lm.timer) {
-        lm.timer.timeLeft = (lm.timer.timeLeft || 0) + ADD_SECONDS;
+        lm.timer.timeLeft = ADD_SECONDS;   // define 30s restantes (nao soma)
         if (typeof lm.timer.updateTime === 'function') lm.timer.updateTime();
         lm.GAMESTATE = 'play';
         try { lm.scene.input.enabled = true; } catch (e) {}
