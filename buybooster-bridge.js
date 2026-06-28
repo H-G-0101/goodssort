@@ -117,12 +117,22 @@
     s[m.count] = (s[m.count] || 0) + GRANT;
     save();
     playSnd('collect');
-    render();
-    closeAndApply();   // fecha e atualiza os contadores na cena que chamou
+    render();          // atualiza saldo + contador, SEM fechar
+    pulseCount();      // feedback visual no contador
   }
 
-  // fecha resumindo o caller e atualizando os boosters dele
-  function closeAndApply() {
+  // pequena pulsacao no badge do contador ao comprar
+  function pulseCount() {
+    try {
+      var el = ui.querySelector('#bbb-count');
+      el.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }],
+        { duration: 260, easing: 'ease-out' });
+    } catch (e) {}
+  }
+
+  // fechar (botao X): resume o caller e aplica os boosters comprados a sessao
+  function close() {
     try {
       var gm = g(), ck = caller();
       hidePhaser(false);
@@ -133,17 +143,6 @@
         try { if (cs && cs.LevelManager && typeof cs.LevelManager.updateBoosters === 'function') cs.LevelManager.updateBoosters(); } catch (e) {}
         try { if (cs && typeof cs.updateInfo === 'function') cs.updateInfo(); } catch (e) {}
       }
-    } catch (e) { console.warn('[BUYBOOSTER-BRIDGE] apply', e); }
-    hide();
-  }
-
-  // fechar sem comprar (mesmo resume, sem updateBoosters obrigatorio)
-  function close() {
-    try {
-      var gm = g(), ck = caller();
-      hidePhaser(false);
-      gm.scene.stop('BuyBooster');
-      if (ck) { try { gm.scene.resume(ck); } catch (e) {} }
     } catch (e) { console.warn('[BUYBOOSTER-BRIDGE] close', e); }
     hide();
   }
