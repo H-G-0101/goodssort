@@ -130,24 +130,36 @@
   }
 
   // ---------- 3) comprar / equipar ----------
+  var adBusy = false;
   function action(cat, id, price, has, isEq) {
     var st = stats(); if (!st) return;
     if (isEq) return; // ja equipado
-    try {
-      if (!has) {
-        if (price > 0) {
-          if (st.coins < price) { flash('Moedas insuficientes'); return; }
-          st.coins -= price;
+    function grantAndEquip(paid) {
+      try {
+        if (!has) {
+          if (paid) st.coins -= price;
+          var idv = isNaN(+id) ? id : +id;
+          st[cat.owned].push(idv);
         }
-        // marca como comprado (respeita tipo do id existente no array)
-        var idv = isNaN(+id) ? id : +id;
-        st[cat.owned].push(idv);
-      }
-      // equipa
-      st[cat.eq] = isNaN(+id) ? id : +id;
-      save();
-      render();
-    } catch (e) { console.warn('[SHOP-BRIDGE] acao falhou', e); }
+        st[cat.eq] = isNaN(+id) ? id : +id;
+        save();
+        render();
+      } catch (e) { console.warn('[SHOP-BRIDGE] acao falhou', e); }
+    }
+    if (!has && !(price > 0)) {
+      // item de AD: so desbloqueia com rewarded REAL (CiDi); overlay traduzido no funil
+      if (adBusy) return;
+      adBusy = true;
+      var fn = window.__cidiAdShow || function () { return Promise.resolve(true); };
+      fn().then(function (ok) {
+        adBusy = false;
+        if (!ok) { flash('Ad n\u00e3o conclu\u00eddo'); return; }
+        grantAndEquip(false);
+      });
+      return;
+    }
+    if (!has && price > 0 && st.coins < price) { flash('Moedas insuficientes'); return; }
+    grantAndEquip(!has && price > 0);
   }
 
   function save() {

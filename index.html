@@ -23,21 +23,52 @@
       - azerion-libs.js + azerion-integration-sdk.js -> sdk-stub.js (offline)
         (os SDKs reais estao em /vendor para estudo)
   -->
-  <script src="sdk-stub.js?v=100"></script>
+  <!-- ===== CiDi Storage SDK: init() ANTES de tudo (localStorage do Pi Browser) ===== -->
+  <!-- URL versionada p/ evitar cache velho (recomendacao da doc CiDi). -->
+  <script src="https://app.cidi.games/sdk/cidi-sdk.js?v=20260427-expose-init-await-pi-init-1"></script>
+  <script>
+  /* Dispara CiDiSDK.init() imediatamente, ANTES do game.
+     No Pi Browser/iOS o localStorage so funciona depois que o init resolve;
+     como os assets sao pesados (Phaser+atlas ~8MB), o init resolve a tempo do 1o save.
+     Expoe window.__cidiReady (Promise) p/ o cidi-storage-bridge fazer a re-leitura de seguranca.
+     Se o SDK nao carregar (offline/estudo), segue normal sem travar o jogo. */
+  window.__cidiReady = new Promise(function (resolve) {
+    var settled = false, done = function (ok) { if (!settled) { settled = true; resolve(ok); } };
+    try {
+      if (window.CiDiSDK && typeof CiDiSDK.init === 'function') {
+        console.log('[CiDi-Storage] init() chamado (ANTES do game)');
+        CiDiSDK.init()
+          .then(function () { console.log('[CiDi-Storage] init() OK (storage pronto)'); done(true); })
+          .catch(function (e) { console.warn('[CiDi-Storage] init() falhou', e); done(false); });
+      } else {
+        console.warn('[CiDi-Storage] CiDiSDK ausente (offline/dev) - seguindo sem storage SDK');
+        done(false);
+      }
+    } catch (e) { console.warn('[CiDi-Storage] erro no init', e); done(false); }
+    setTimeout(function () { done(false); }, 8000); // fallback: nunca deixa pendente
+  });
+  </script>
+
+  <script src="sdk-stub.js?v=105"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=100" defer="defer"></script>
-  <script src="shop-bridge.js?v=100" defer="defer"></script>
-  <script src="pause-bridge.js?v=100" defer="defer"></script>
-  <script src="settings-bridge.js?v=100" defer="defer"></script>
-  <script src="levelend-bridge.js?v=100" defer="defer"></script>
-  <script src="menu-bridge.js?v=100" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=100" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=100" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=100" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=100" defer="defer"></script>
-  <script src="ranking-bridge.js?v=100" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=100" defer="defer"></script>
-  <script defer="defer" src="game/grocery-store.min.js?v=100"></script>
+  <script src="boot-counter-bridge.js?v=105" defer="defer"></script>
+  <script src="shop-bridge.js?v=105" defer="defer"></script>
+  <script src="pause-bridge.js?v=105" defer="defer"></script>
+  <script src="settings-bridge.js?v=105" defer="defer"></script>
+  <script src="levelend-bridge.js?v=105" defer="defer"></script>
+  <script src="menu-bridge.js?v=105" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=105" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=105" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=105" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=105" defer="defer"></script>
+  <script src="ranking-bridge.js?v=105" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=105" defer="defer"></script>
+  <script src="cidi-storage-bridge.js?v=105" defer="defer"></script>
+  <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
+  <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=105" defer="defer"></script>
+  <script src="cidi-report-bridge.js?v=105" defer="defer"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=105"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->

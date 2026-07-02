@@ -108,11 +108,20 @@
   }
   function startCycle() { stopCycle(); cycleTimer = setInterval(function () { if (applied) return; cycleIdx = (cycleIdx + 1) % OPTIONS.length; renderWin(); }, 90); }
   function stopCycle() { if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; } }
+  var adBusy = false;
   function onWinAd() {
-    if (applied) return; stopCycle(); applied = true;
-    var st = stats(); var bonus = rewardAmount() * OPTIONS[cycleIdx];
-    if (st) { st.coins = (st.coins || 0) + bonus; save(); }
-    renderWin();
+    if (applied || adBusy) return;
+    adBusy = true; stopCycle();                       // trava o multiplicador atual
+    var btn = winUI.querySelector('#lebg-ad'); btn.style.filter = 'grayscale(0.4)';
+    var fn = window.__cidiAdShow || function () { return Promise.resolve(true); };
+    fn().then(function (ok) {
+      adBusy = false;
+      if (!ok) { btn.style.filter = ''; startCycle(); return; }   // ad falhou -> roleta volta
+      applied = true;
+      var st = stats(); var bonus = rewardAmount() * OPTIONS[cycleIdx];
+      if (st) { st.coins = (st.coins || 0) + bonus; save(); }
+      renderWin();
+    });
   }
   function onContinue() {
     try {
@@ -160,26 +169,35 @@
     root.querySelector('#lebg-lrestart').onclick = goRestart;
   }
   function renderLost() { lostUI.querySelector('#lebg-secs').textContent = '+' + rewardSeconds() + ' Sec.'; }
+  var adBusyLost = false;
   function onAddTime() {
-    // continua o MESMO tabuleiro com +ADD_SECONDS (reverte o setLost): soma tempo,
-    // GAMESTATE='play', reabilita input, fecha LevelEnd. O update() retoma a contagem.
-    // OFFLINE: ad e sucesso imediato. Trocar por CiDi rewarded -> so continuar no sucesso.
-    try {
-      var gm = g(), m = mode();
-      var lvl = gm.scene.getScene(m);
-      var lm = lvl && lvl.LevelManager;
-      if (lm && lm.timer) {
-        lm.timer.timeLeft = ADD_SECONDS;   // define 30s restantes (nao soma)
-        if (typeof lm.timer.updateTime === 'function') lm.timer.updateTime();
-        lm.GAMESTATE = 'play';
-        try { lm.scene.input.enabled = true; } catch (e) {}
-        hidePhaser(false);
-        try { gm.scene.stop('LevelEnd'); } catch (e) {}
-        hide();
-        return;
-      }
-    } catch (e) { console.warn('[LEVELEND-BRIDGE] addTime', e); }
-    goRestart(); // fallback se nao achar o timer
+    // AD REAL (CiDi): so continua no sucesso. Overlay traduzido vem do funil.
+    if (adBusyLost) return;
+    adBusyLost = true;
+    var btn = lostUI.querySelector('#lebg-addtime'); btn.style.filter = 'grayscale(0.4)';
+    var fn = window.__cidiAdShow || function () { return Promise.resolve(true); };
+    fn().then(function (ok) {
+      adBusyLost = false; btn.style.filter = '';
+      if (!ok) return;                                  // ad falhou -> fica na tela
+      // continua o MESMO tabuleiro com +ADD_SECONDS (reverte o setLost): soma tempo,
+      // GAMESTATE='play', reabilita input, fecha LevelEnd. O update() retoma a contagem.
+      try {
+        var gm = g(), m = mode();
+        var lvl = gm.scene.getScene(m);
+        var lm = lvl && lvl.LevelManager;
+        if (lm && lm.timer) {
+          lm.timer.timeLeft = ADD_SECONDS;   // define 30s restantes (nao soma)
+          if (typeof lm.timer.updateTime === 'function') lm.timer.updateTime();
+          lm.GAMESTATE = 'play';
+          try { lm.scene.input.enabled = true; } catch (e) {}
+          hidePhaser(false);
+          try { gm.scene.stop('LevelEnd'); } catch (e) {}
+          hide();
+          return;
+        }
+      } catch (e) { console.warn('[LEVELEND-BRIDGE] addTime', e); }
+      goRestart(); // fallback se nao achar o timer
+    });
   }
 
   /* ---------- hook anti-flash + ciclo ---------- */
