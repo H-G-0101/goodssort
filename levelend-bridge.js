@@ -20,6 +20,9 @@
   function result() { var lc = levelConfig(); return lc && lc.result; }
   function isLost() { return result() === 'lost'; }
   function rewardAmount() { var sc = scene(); return (sc && typeof sc.rewardAmount === 'number') ? sc.rewardAmount : 0; }
+  // base do bonus da roleta em MOEDAS (nativo era 100 fixo; agora 40 fixo - edite a vontade)
+  var BONUS_BASE = 40;
+  function bonusBase() { return BONUS_BASE; }
   function rewardSeconds() { return ADD_SECONDS; }
   function mode() { var lc = levelConfig(); return (lc && lc.mode) ? lc.mode : 'Level'; }
   function hidePhaser(hideIt) { try { var sc = scene(); if (sc && sc.sys && sc.sys.setVisible) sc.sys.setVisible(!hideIt); } catch (e) {} }
@@ -99,7 +102,7 @@
   }
   function renderWin() {
     var lc = levelConfig(); var sc = (lc && typeof lc.earnedScore === 'number') ? lc.earnedScore : 0;
-    var mult = OPTIONS[cycleIdx]; var bonus = rewardAmount() * mult;
+    var mult = OPTIONS[cycleIdx]; var bonus = bonusBase() * mult;
     winUI.querySelector('#lebg-score').textContent = 'Score : ' + sc;
     winUI.querySelector('#lebg-bonus').textContent = '+' + bonus;
     winUI.querySelector('#lebg-badge').textContent = '\u00D7' + mult;
@@ -113,12 +116,12 @@
     if (applied || adBusy) return;
     adBusy = true; stopCycle();                       // trava o multiplicador atual
     var btn = winUI.querySelector('#lebg-ad'); btn.style.filter = 'grayscale(0.4)';
-    var fn = window.__cidiAdShow || function () { return Promise.resolve(true); };
+    var fn = window.__cidiAdShow || function () { return Promise.resolve(false); }; // fail-closed: sem funil = sem reward
     fn().then(function (ok) {
       adBusy = false;
       if (!ok) { btn.style.filter = ''; startCycle(); return; }   // ad falhou -> roleta volta
       applied = true;
-      var st = stats(); var bonus = rewardAmount() * OPTIONS[cycleIdx];
+      var st = stats(); var bonus = bonusBase() * OPTIONS[cycleIdx];
       if (st) { st.coins = (st.coins || 0) + bonus; save(); }
       renderWin();
     });
@@ -175,7 +178,7 @@
     if (adBusyLost) return;
     adBusyLost = true;
     var btn = lostUI.querySelector('#lebg-addtime'); btn.style.filter = 'grayscale(0.4)';
-    var fn = window.__cidiAdShow || function () { return Promise.resolve(true); };
+    var fn = window.__cidiAdShow || function () { return Promise.resolve(false); }; // fail-closed: sem funil = sem reward
     fn().then(function (ok) {
       adBusyLost = false; btn.style.filter = '';
       if (!ok) return;                                  // ad falhou -> fica na tela
