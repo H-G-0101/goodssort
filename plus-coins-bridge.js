@@ -38,7 +38,7 @@
   function playAd(cb) {
     var fn = window.__cidiAdShow;
     if (typeof fn === 'function') { fn().then(cb); }
-    else { try { cb(true); } catch (e) {} }   // fallback improvavel (stub ausente)
+    else { try { cb(false); } catch (e) {} }  // fail-closed: sem funil = NAO concede
   }
 
   function coinIcon() {

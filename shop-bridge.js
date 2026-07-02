@@ -150,7 +150,7 @@
       // item de AD: so desbloqueia com rewarded REAL (CiDi); overlay traduzido no funil
       if (adBusy) return;
       adBusy = true;
-      var fn = window.__cidiAdShow || function () { return Promise.resolve(true); };
+      var fn = window.__cidiAdShow || function () { return Promise.resolve(false); }; // fail-closed: sem funil = sem reward
       fn().then(function (ok) {
         adBusy = false;
         if (!ok) { flash('Ad n\u00e3o conclu\u00eddo'); return; }

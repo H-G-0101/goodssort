@@ -101,8 +101,24 @@
   }
   function gridHTML() { return dayCell(1) + dayCell(2) + dayCell(3) + dayCell(4) + dayCell(5) + dayCell(6) + day7(); }
 
+  var collecting = false;
   function onCollect() {
-    var st = stats(); if (!st) { close(); return; }
+    if (collecting) return;                 // anti double-tap (coleta dupla)
+    collecting = true;
+    var st = stats(); if (!st) { collecting = false; close(); return; }
+    // ELEGIBILIDADE: 1 claim por dia-calendario. Se a cena for reaberta no mesmo dia
+    // (qualquer fluxo), fecha sem conceder - nao confia so no gate da cena nativa.
+    var last = st.lastRewardDate || 0;
+    if (last > 0) {
+      var a = new Date(last), b = new Date();
+      var sameDay = a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+      if (sameDay) {
+        console.warn('[DAILY-BRIDGE] ja coletado hoje - sem novo premio.');
+        close();
+        setTimeout(function () { collecting = false; }, 800);
+        return;
+      }
+    }
     var d = DAYS[rewardDay() - 1];
     if (d.type === 'coins') st.coins = (st.coins || 0) + d.amount;
     else if (d.type === 'hint') st.hintCount = (st.hintCount || 0) + d.amount;
@@ -113,6 +129,7 @@
     save();
     try { if (st.audio && g().sounds && g().sounds.collect) g().sounds.collect.play(); } catch (e) {}
     close();
+    setTimeout(function () { collecting = false; }, 800);   // libera so depois de fechado
   }
   function close() {
     try {
