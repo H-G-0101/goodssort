@@ -98,6 +98,12 @@
       } catch (e) { logln('storage erro: ' + e.message, false); }
     });
     bind('cdbg-t-log', function () {
+      var ens = window.__cidiEnsureLogin;
+      if (typeof ens === 'function') {
+        logln('ensureLogin()...');
+        ens().then(function (ok) { logln('login: ' + (ok ? 'OK' : 'falhou'), ok); refresh(); });
+        return;
+      }
       if (!cli) { logln('sem client (proxy nao carregou?)', false); return; }
       logln('login()...');
       cli.auth.login().then(function () { window.__cidiLoggedIn = true; logln('login OK', true); refresh(); })
