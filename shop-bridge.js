@@ -41,6 +41,17 @@
   ];
   var EMOJI = { products: '🛒', shelfs: '🗄️', backgrounds: '🖼️' };
 
+  // Preços customizados (sobrepõem o config nativo). id -> preço em moedas.
+  // Produtos deixam de ser "Assistir AD": pastry 500, pharmacy 1000, cleaning 1000.
+  var PRICE_OVERRIDE = {
+    products: { pastry: 500, pharmacy: 1000, cleaning: 1000 }
+  };
+  function priceOf(cat, id, nativePrice) {
+    var o = PRICE_OVERRIDE[cat.cfg];
+    if (o && typeof o[id] !== 'undefined') return o[id];
+    return nativePrice;
+  }
+
   var ui = null, shown = false, curTab = 0, pausedKeys = [];
 
   // ---------- 2) overlay ----------
@@ -104,6 +115,7 @@
     var itemsEl = ui.querySelector('#sb-items'); itemsEl.innerHTML = '';
     Object.keys(data).forEach(function (id) {
       var price = data[id] && typeof data[id].price !== 'undefined' ? data[id].price : 0;
+      price = priceOf(cat, id, price);
       var has = owned.indexOf(id) !== -1 || owned.indexOf(isNaN(+id) ? id : +id) !== -1;
       var isEq = String(equipped) === String(id);
       var tile = document.createElement('div');
