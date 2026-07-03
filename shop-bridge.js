@@ -113,7 +113,7 @@
       else if (has) { label = 'Selecionar'; kind = 'sel'; }
       else if (price > 0) { label = '🪙 ' + price; kind = 'buy'; }
       else { label = 'Assistir AD'; kind = 'buy'; }
-      var prevSrc = 'assets/shop-previews/' + (cat.cfg === 'products' ? 'products/_default' : cat.cfg + '/' + id) + '.png';
+      var prevSrc = 'assets/shop-previews/' + cat.cfg + '/' + id + '.png';
       tile.innerHTML =
         (isEq ? '<span style="position:absolute;top:-9px;right:-9px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:linear-gradient(#d678e8,#b23ccf);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;z-index:2;">✓</span>' : '') +
         '<div style="width:100%;aspect-ratio:1.15;border-radius:14px;border:1px solid #c2b8ec;background:linear-gradient(#f0ecff,#e3dcf6);display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
