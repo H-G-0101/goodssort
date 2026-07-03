@@ -41,14 +41,18 @@
   ];
   var EMOJI = { products: '🛒', shelfs: '🗄️', backgrounds: '🖼️' };
 
-  // Preços customizados (sobrepõem o config nativo). id -> preço em moedas.
-  // Produtos deixam de ser "Assistir AD": pastry 500, pharmacy 1000, cleaning 1000.
+  // Preços customizados (sobrepõem o config nativo). id -> preço em moedas; '*' = todos.
+  // Produtos: pastry 500, pharmacy 1000, cleaning 1000. Fundos: TODOS 300 (sem AD).
   var PRICE_OVERRIDE = {
-    products: { pastry: 500, pharmacy: 1000, cleaning: 1000 }
+    products:    { pastry: 500, pharmacy: 1000, cleaning: 1000 },
+    backgrounds: { '*': 300 }
   };
   function priceOf(cat, id, nativePrice) {
     var o = PRICE_OVERRIDE[cat.cfg];
-    if (o && typeof o[id] !== 'undefined') return o[id];
+    if (o) {
+      if (typeof o[id] !== 'undefined') return o[id];
+      if (typeof o['*'] !== 'undefined') return o['*'];
+    }
     return nativePrice;
   }
 
