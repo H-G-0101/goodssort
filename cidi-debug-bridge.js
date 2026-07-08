@@ -45,8 +45,8 @@
       row(wr, 'localStorage write/read', wr ? 'OK' : 'FAILED') +
       row(!!probe, 'persist probe', probe ? 'survived' : 'none') +
       row(!!disk, 'disk save exists', disk ? 'yes' : 'no') +
-      row(disk ? null : false, 'DISK level / coins', disk && disk.stats ? (disk.stats.currentCommonLevel + ' / ' + disk.stats.coins) : '-') +
-      row(s ? null : false, 'GAME level / coins', s ? (s.currentCommonLevel + ' / ' + s.coins) : '-') +
+      row(disk ? null : false, 'DISK  lvl / coins', disk && disk.stats ? ('lvl ' + disk.stats.currentCommonLevel + ' \u00b7 ' + disk.stats.coins + 'c') : '-') +
+      row(s ? null : false, 'GAME  lvl / coins', s ? ('lvl ' + s.currentCommonLevel + ' \u00b7 ' + s.coins + 'c') : '-') +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
       row(typeof window.__cidiAdShow === 'function', 'ad funnel', typeof window.__cidiAdShow === 'function' ? 'ready' : 'no');
   }
@@ -142,6 +142,15 @@
   }
 
   build();
+  // drena os logs capturados antes do painel existir (boot/mirror)
+  try {
+    (window.__cidiEarlyLogs || []).forEach(function (s) {
+      var kind = /PERSISTED|OK|resolved: true|restored|saved -> |WRITTEN/.test(s) ? 'ok'
+               : /did NOT|FAILED|MISSING|failed|error/.test(s) ? 'bad' : 'evt';
+      push(kind, s);
+    });
+    window.__cidiEarlyLogs = { push: function (s) { var k = /saved -> |WRITTEN|PERSISTED/.test(s) ? 'ok' : /MISSING|FAILED|did NOT/.test(s) ? 'bad' : 'evt'; push(k, s); } };
+  } catch (e) {}
   setInterval(function () { if (g()) { build(); tryWrap(); if (open) renderStatus(); } }, 1000);
   console.log('%c[CiDi-Debug]', 'color:#3fd0ff', 'Bus Jam-style status+log panel ready.');
 })();
