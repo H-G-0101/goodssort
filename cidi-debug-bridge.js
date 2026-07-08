@@ -72,7 +72,8 @@
     panel.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(63,208,255,.1);border-bottom:1px solid rgba(255,255,255,.1);">' +
         '<b style="color:#aef3ff;font-size:13px;">CiDi debug</b>' +
-        '<span><button id="cd-copy" style="margin-right:6px;border:1px solid #3fd0ff;background:none;color:#aef3ff;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;">copy</button>' +
+        '<span><button id="cd-adtest" style="margin-right:6px;border:1px solid #ffd24a;background:none;color:#ffd24a;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;">test ad</button>' +
+        '<button id="cd-copy" style="margin-right:6px;border:1px solid #3fd0ff;background:none;color:#aef3ff;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;">copy</button>' +
         '<button id="cd-clear" style="margin-right:6px;border:1px solid #3fd0ff;background:none;color:#aef3ff;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;">clear</button>' +
         '<button id="cd-x" style="border:none;background:none;color:#fff;font-size:15px;cursor:pointer;">&times;</button></span></div>' +
       '<div id="cd-status" style="padding:8px 12px;font-size:11.5px;border-bottom:1px solid rgba(255,255,255,.08);"></div>' +
@@ -84,6 +85,22 @@
     panel.querySelector('#cd-copy').onclick = function () {
       var txt = lines.slice().reverse().map(function (l) { return '[' + l.t + '] ' + l.m; }).join('\n');
       try { navigator.clipboard.writeText(txt); push('info', 'log copied'); } catch (e) {}
+    };
+    panel.querySelector('#cd-adtest').onclick = function () {
+      // Chama o rewarded do CiDi DIRETO p/ capturar o codigo de erro exato (doc: AD_NOT_CERTIFIED,
+      // AD_NOT_AVAILABLE, PI_ADS_NOT_AVAILABLE, USER_UNAUTHENTICATED, TIMEOUT, etc).
+      if (!(window.CiDiSDK && typeof CiDiSDK.showRewardedAd === 'function')) { push('bad', 'ad test: CiDiSDK.showRewardedAd ABSENT'); return; }
+      push('evt', 'CiDiSDK.showRewardedAd({timeout:300000}) ...');
+      try {
+        CiDiSDK.showRewardedAd({ timeout: 300000 })
+          .then(function (r) {
+            var ok = !!(r && r.success === true);
+            push(ok ? 'ok' : 'bad', 'ad -> success=' + (r && r.success) + ' ' + safe(r));
+          })
+          .catch(function (err) {
+            push('bad', 'ad FAILED -> error=' + (err && (err.error || err.code)) + ' | msg=' + (err && err.message) + ' | ' + safe(err));
+          });
+      } catch (e) { push('bad', 'ad threw: ' + (e && e.message)); }
     };
   }
 

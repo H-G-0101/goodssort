@@ -79,7 +79,7 @@
             })
             .catch(function (err) {
               adOverlay(false);
-              console.warn('[CiDi-Ad] showRewardedAd falhou:', err && err.error, err && err.message);
+              console.warn('[CiDi-Ad] showRewardedAd FAILED -> error=' + (err && (err.error || err.code)) + ' msg=' + (err && err.message));
               resolve(false);
             });
           return;
