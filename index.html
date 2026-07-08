@@ -45,7 +45,7 @@
     });
   })();
   </script>
-  <script>window.__BUILD__='v91';console.log('[CiDi-Persist] BUILD v91 loaded');</script>
+  <script>window.__BUILD__='v92';console.log('[CiDi-Persist] BUILD v92 loaded');</script>
   <script>
   /* SPY DE STORAGE - roda ANTES de tudo. Nao altera comportamento; so LOGA quem apaga/grava
      a chave do save, com stack, p/ o painel dbg mostrar. Remover no build final. */
@@ -99,56 +99,80 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=146"></script>
+  <script src="sdk-stub.js?v=147"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=146" defer="defer"></script>
-  <script src="shop-bridge.js?v=146" defer="defer"></script>
-  <script src="pause-bridge.js?v=146" defer="defer"></script>
-  <script src="settings-bridge.js?v=146" defer="defer"></script>
-  <script src="levelend-bridge.js?v=146" defer="defer"></script>
-  <script src="menu-bridge.js?v=146" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=146" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=146" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=146" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=146" defer="defer"></script>
-  <script src="ranking-bridge.js?v=146" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=146" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=147" defer="defer"></script>
+  <script src="shop-bridge.js?v=147" defer="defer"></script>
+  <script src="pause-bridge.js?v=147" defer="defer"></script>
+  <script src="settings-bridge.js?v=147" defer="defer"></script>
+  <script src="levelend-bridge.js?v=147" defer="defer"></script>
+  <script src="menu-bridge.js?v=147" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=147" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=147" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=147" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=147" defer="defer"></script>
+  <script src="ranking-bridge.js?v=147" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=147" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=146" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=146" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=146" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=146" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=146" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=146" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=147" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=147" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=147" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=147" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=147" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=147" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
-/* PERSISTENCIA CiDi - versao SIMPLES (igual v65, que funcionava; 2248/Bus Jam pattern).
-   O jogo salva sozinho no localStorage; init() (no head) torna isso persistente no Pi.
-   Aqui so RE-LEMOS o save apos o init, caso o jogo tenha bootado com defaults antes do
-   storage ficar pronto. SEM hook no saveUserData, SEM mirror, SEM anti-clobber (essas
-   camadas do v71+ quebraram o save nativo). Best-effort. + flush leve no fechar. */
+/* PERSISTENCIA v92 - MIRROR AUTONOMO.
+   Cada peca em seu proprio try/catch e em seu proprio IIFE: se uma falhar, as outras seguem.
+   O MIRROR e a peca essencial (grava game.data no disco). Nao toca em saveUserData. */
+
+/* 1) MIRROR: grava o estado do jogo no disco a cada 1s e ao sair. */
 (function () {
-  var SAVE_KEY = 'grocery-store_sgk';
-  var done = false;
+  var KEY = 'grocery-store_sgk', lastSig = null, diag = 0;
   function g() { return window.__game; }
-  function findKey() {
-    try {
-      if (localStorage.getItem(SAVE_KEY) != null) return SAVE_KEY;
-      for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.slice(-4) === '_sgk') return k; }
-    } catch (e) {}
-    return SAVE_KEY;
+  function fresh(d) {
+    if (!d || !d.stats) return true;
+    var s = d.stats;
+    return (s.currentCommonLevel || 1) <= 1 && !(s.coins > 0) && !(s.score > 0);
   }
+  function write(tag) {
+    try {
+      var gm = g();
+      if (!gm || !gm.data || !gm.data.stats) { if (diag++ < 3) console.warn('[CiDi-Persist] mirror: no __game yet'); return; }
+      var st = gm.data.stats;
+      if (diag++ < 3) console.log('[CiDi-Persist] mirror sees -> lvl ' + st.currentCommonLevel + ' coins ' + st.coins + ' fresh=' + fresh(gm.data));
+      if (fresh(gm.data)) return;
+      var json = JSON.stringify(gm.data);
+      localStorage.setItem(KEY, json);
+      var sig = st.currentCommonLevel + ':' + st.coins;
+      if (sig !== lastSig) { lastSig = sig; console.log('[CiDi-Persist] mirror saved (' + (tag || 'tick') + ') -> lvl ' + st.currentCommonLevel + ' coins ' + st.coins); }
+    } catch (e) { console.warn('[CiDi-Persist] mirror write error: ' + (e && e.message)); }
+  }
+  try { setInterval(function () { write('tick'); }, 1000); } catch (e) {}
+  ['pagehide', 'beforeunload', 'blur'].forEach(function (ev) {
+    try { window.addEventListener(ev, function () { write(ev); }); } catch (e) {}
+  });
+  try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') write('hidden'); }); } catch (e) {}
+  console.log('[CiDi-Persist] mirror armed (1s + on close)');
+})();
+
+/* 2) RECOVER: apos o init, se o jogo bootou fresh mas ha save melhor no disco, reaplica. */
+(function () {
+  var KEY = 'grocery-store_sgk', done = false;
+  function g() { return window.__game; }
   function refresh() {
     try {
       var gm = g(); if (!gm || !gm.scene || !gm.scene.scenes) return;
       gm.scene.scenes.forEach(function (sc) {
-        try { if (sc.sys && sc.sys.isActive && sc.sys.isActive()) {
-          if (typeof sc.updateInfo === 'function') sc.updateInfo();
-          if (sc.LevelManager && typeof sc.LevelManager.updateBoosters === 'function') sc.LevelManager.updateBoosters();
-        } } catch (e) {}
+        try {
+          if (sc.sys && sc.sys.isActive && sc.sys.isActive()) {
+            if (typeof sc.updateInfo === 'function') sc.updateInfo();
+            if (sc.LevelManager && typeof sc.LevelManager.updateBoosters === 'function') sc.LevelManager.updateBoosters();
+          }
+        } catch (e) {}
       });
     } catch (e) {}
   }
@@ -157,89 +181,33 @@
     var gm = g(); if (!gm || !gm.data || !gm.data.stats) return;
     done = true;
     try {
-      var raw = localStorage.getItem(findKey());
+      var raw = localStorage.getItem(KEY);
       var disk = raw ? JSON.parse(raw) : null;
-      if (disk && disk.stats) console.log('[CiDi-Persist] DISK save on boot -> level ' + disk.stats.currentCommonLevel + ' coins ' + disk.stats.coins);
-      else console.log('[CiDi-Persist] no disk save yet (fresh).');
-      console.log('[CiDi-Persist] GAME loaded -> level ' + gm.data.stats.currentCommonLevel + ' coins ' + gm.data.stats.coins);
-      var bootedFresh = gm.data.stats.firstLoad === true;
-      // so restaura se o disco tiver MAIS progresso que o estado atual (evita puxar um save lv1 velho)
+      console.log('[CiDi-Persist] DISK on boot -> ' + (disk && disk.stats ? ('lvl ' + disk.stats.currentCommonLevel + ' coins ' + disk.stats.coins) : 'none'));
+      console.log('[CiDi-Persist] GAME on boot -> lvl ' + gm.data.stats.currentCommonLevel + ' coins ' + gm.data.stats.coins);
       var diskLv = disk && disk.stats ? (disk.stats.currentCommonLevel || 0) : 0;
       var gameLv = gm.data.stats.currentCommonLevel || 0;
-      var savedReal = disk && disk.stats && disk.stats.firstLoad === false && diskLv >= gameLv;
-      if (bootedFresh && savedReal) {
+      if (disk && disk.stats && diskLv > gameLv) {
         gm.data = disk;
-        console.log('[CiDi-Storage] persisted state restored after init.');
+        console.log('[CiDi-Persist] restored from disk -> lvl ' + diskLv);
         refresh();
-      } else {
-        console.log('[CiDi-Storage] save already loaded correctly at boot (nothing to do).');
       }
-    } catch (e) { console.warn('[CiDi-Storage] recover failed', e); }
+    } catch (e) { console.warn('[CiDi-Persist] recover error: ' + (e && e.message)); }
   }
-  // flush leve ao fechar/minimizar: pede pro PROPRIO jogo salvar (nao sobrescreve nada)
-  function flush() { try { var gm = g(); if (gm && typeof gm.saveUserData === 'function') gm.saveUserData(); } catch (e) {} }
-  ['pagehide','beforeunload','freeze'].forEach(function (ev) { try { window.addEventListener(ev, flush, { capture: true }); } catch (e) {} });
-  try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); }, { capture: true }); } catch (e) {}
-
-  (window.__cidiReady || Promise.resolve(false)).then(function () {
-    var iv = setInterval(function () {
-      if (done) { clearInterval(iv); return; }
-      if (g() && g().data && g().data.stats) { clearInterval(iv); recover(); }
-    }, 30);
-    setTimeout(function () { clearInterval(iv); }, 15000);
-  });
-  console.log('%c[CiDi-Storage]', 'color:#2bb583', 'persistence SIMPLE (re-read after init, native save).');
-
-  // MIRROR SIMPLES: o jogo grava o save no boot mas nao o atualiza depois (DISK ficava lv1).
-  // Copiamos game.data -> disco a cada 1s (e ao fechar). NAO tocamos em saveUserData
-  // (envolve-lo quebrou o save nativo em v71+). So escrevemos quando ha progresso real.
-  (function () {
-    var KEY = 'grocery-store_sgk', lastLv = null;
-    function g() { return window.__game; }
-    function isFresh(d) {
-      if (!d || !d.stats) return true; var s = d.stats;
-      return (s.currentCommonLevel || 1) <= 1 && !(s.coins > 0) && !(s.score > 0);
-    }
-    var diag = 0;
-    function write() {
-      try {
-        var gm = g();
-        if (!gm || !gm.data || !gm.data.stats) { if (diag++ < 3) console.warn('[CiDi-Persist] mirror: __game/data MISSING'); return; }
-        if (diag++ < 3) console.log('[CiDi-Persist] mirror sees -> lv ' + gm.data.stats.currentCommonLevel + ' coins ' + gm.data.stats.coins + ' fresh=' + isFresh(gm.data));
-        if (isFresh(gm.data)) return;                 // nunca sobrescreve com defaults
-        localStorage.setItem(KEY, JSON.stringify(gm.data));
-        var lv = gm.data.stats.currentCommonLevel;
-        if (lv !== lastLv) { lastLv = lv; console.log('[CiDi-Persist] mirror saved -> level ' + lv + ' coins ' + gm.data.stats.coins); }
-      } catch (e) {}
-    }
-    setInterval(write, 1000);
-    ['pagehide','beforeunload','freeze','blur'].forEach(function (ev) { try { window.addEventListener(ev, write, { capture: true }); } catch (e) {} });
-    try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') write(); }, { capture: true }); } catch (e) {}
-  })();
-
-
-  // OBSERVADOR PASSIVO: nao toca no save do jogo; so verifica a cada 1s se a chave existe/mudou.
-  // Assim vemos no dbg se o jogo esta escrevendo no disco.
-  (function () {
-    var last = null;
-    setInterval(function () {
-      try {
-        var raw = localStorage.getItem('grocery-store_sgk');
-        var lv = raw ? (JSON.parse(raw).stats || {}).currentCommonLevel : null;
-        var sig = raw ? ('lv' + lv + ':' + raw.length) : 'NONE';
-        if (sig !== last) {
-          last = sig;
-          if (raw) console.log('[CiDi-Persist] disk save WRITTEN -> level ' + lv + ' (bytes ' + raw.length + ')');
-          else console.warn('[CiDi-Persist] disk save MISSING (game is not writing)');
-        }
-      } catch (e) {}
-    }, 1000);
-  })();
-
+  try {
+    (window.__cidiReady || Promise.resolve(false)).then(function (ok) {
+      console.log('[CiDi-Persist] init resolved: ' + ok);
+      var iv = setInterval(function () {
+        if (done) { clearInterval(iv); return; }
+        if (g() && g().data && g().data.stats) { clearInterval(iv); recover(); }
+      }, 50);
+      setTimeout(function () { clearInterval(iv); }, 15000);
+    });
+  } catch (e) { console.warn('[CiDi-Persist] recover hook error'); }
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=146"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=147"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -248,7 +216,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=146" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=147" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>
