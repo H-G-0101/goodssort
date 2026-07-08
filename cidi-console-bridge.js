@@ -91,6 +91,25 @@
     push('info', 'console ligado - interceptando client.report.* e auth.login');
   }
 
+  // espelha logs de persistencia/storage na tela (diagnostico iOS)
+  (function hookConsole() {
+    ['log', 'warn', 'error'].forEach(function (m) {
+      var orig = console[m] ? console[m].bind(console) : function () {};
+      console[m] = function () {
+        try {
+          var a = Array.prototype.slice.call(arguments);
+          var s = a.map(function (x) { return typeof x === 'string' ? x : safe(x); }).join(' ');
+          if (/\[CiDi-(Persist|Storage|Login|Ad)\]/.test(s)) {
+            var kind = /PERSISTIU|OK|resolvido: true|restaurado/.test(s) ? 'ok'
+                     : /NAO|FALHOU|falhou|erro/.test(s) ? 'erro' : 'info';
+            push(kind, s.replace(/%c/g, '').replace(/color:[^;]+;?(font-weight:bold)?/g, '').trim());
+          }
+        } catch (e) {}
+        return orig.apply(null, arguments);
+      };
+    });
+  })();
+
   build();
   var iv = setInterval(function () { tryWrap(); if (wrapped) clearInterval(iv); }, 200);
   setTimeout(function () { clearInterval(iv); }, 30000);
