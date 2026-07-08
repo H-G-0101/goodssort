@@ -115,7 +115,20 @@
     persistProbe();                          // <<< prova de persistencia no aparelho
     PERSISTED = readSaved();
     var t = 0, iv = setInterval(function () { t += 100; hookSave(); restore(); if (restored || t > 15000) clearInterval(iv); }, 100);
-    setInterval(mirror, 3000);               // espelha o save a cada 3s (pos-init)
+    setInterval(mirror, 1500);               // espelha a cada 1.5s (pos-init)
+
+    // FLUSH IMEDIATO ao sair/minimizar/fechar: garante que a ULTIMA acao (fase concluida etc)
+    // seja persistida antes do Pi Browser fechar. Resolve "voltou pra fase anterior".
+    function flush() {
+      try {
+        var gm = g();
+        if (initDone && gm && gm.data && !isFresh(gm.data)) { sawReal = true; writeSave(gm.data); PERSISTED = clone(gm.data); }
+      } catch (e) {}
+    }
+    ['pagehide', 'beforeunload', 'blur', 'freeze'].forEach(function (ev) {
+      try { window.addEventListener(ev, flush, { capture: true }); } catch (e) {}
+    });
+    try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); }, { capture: true }); } catch (e) {}
   });
 
   console.log('%c[CiDi-Storage]', 'color:#2bb583', 'persistence v3 (probe + mirror + restore + anti-clobber).');
