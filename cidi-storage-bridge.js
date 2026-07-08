@@ -56,12 +56,12 @@
   function persistProbe() {
     try {
       var prev = localStorage.getItem(PROBE_KEY);
-      if (prev) console.log('%c[CiDi-Persist] localStorage PERSISTIU (probe anterior encontrado: ' + prev + ')', 'color:#2bb583;font-weight:bold');
-      else console.warn('[CiDi-Persist] NENHUM probe anterior -> localStorage NAO persistiu (ou 1a vez).');
+      if (prev) console.log('%c[CiDi-Persist] localStorage PERSISTED (previous probe found: ' + prev + ')', 'color:#2bb583;font-weight:bold');
+      else console.warn('[CiDi-Persist] NO previous probe -> localStorage did NOT persist (or first run).');
       localStorage.setItem(PROBE_KEY, new Date().toISOString());
       var chk = localStorage.getItem(PROBE_KEY);
-      console.log('[CiDi-Persist] write/read imediato: ' + (chk ? 'OK' : 'FALHOU') + ' | key do save: ' + findKey() + ' | save existe? ' + (readSaved() ? 'SIM' : 'nao'));
-    } catch (e) { console.warn('[CiDi-Persist] erro no probe', e); }
+      console.log('[CiDi-Persist] immediate write/read: ' + (chk ? 'OK' : 'FAILED') + ' | save key: ' + findKey() + ' | save exists? ' + (readSaved() ? 'YES' : 'no'));
+    } catch (e) { console.warn('[CiDi-Persist] probe error', e); }
   }
 
   function restore() {
@@ -72,7 +72,7 @@
     if (b && prog(b) > prog(gm.data)) {
       gm.data = b; restored = true; sawReal = true; PERSISTED = clone(b);
       writeSave(b); refresh();
-      console.log('[CiDi-Storage] progresso restaurado pos-init.');
+      console.log('[CiDi-Storage] progress restored after init.');
     }
   }
   // MIRROR: grava o estado atual no store persistente (pos-init, so se ha dado real)
@@ -95,7 +95,7 @@
         if (!sawReal && isFresh(gm.data) && b && prog(b) > prog(gm.data)) {   // clobber de boot iOS
           gm.data = b; restored = true; sawReal = true; PERSISTED = clone(b);
           writeSave(b); refresh();
-          console.log('[CiDi-Storage] clobber de boot evitado.');
+          console.log('[CiDi-Storage] boot clobber prevented (real save kept).');
           return;
         }
       } catch (e) {}
@@ -111,12 +111,12 @@
 
   (window.__cidiReady || Promise.resolve(false)).then(function (ok) {
     initDone = true;
-    console.log('[CiDi-Persist] init resolvido: ' + ok);
+    console.log('[CiDi-Persist] init resolved: ' + ok);
     persistProbe();                          // <<< prova de persistencia no aparelho
     PERSISTED = readSaved();
     var t = 0, iv = setInterval(function () { t += 100; hookSave(); restore(); if (restored || t > 15000) clearInterval(iv); }, 100);
     setInterval(mirror, 3000);               // espelha o save a cada 3s (pos-init)
   });
 
-  console.log('%c[CiDi-Storage]', 'color:#2bb583', 'persistencia v3 (probe + mirror + restore + anti-clobber).');
+  console.log('%c[CiDi-Storage]', 'color:#2bb583', 'persistence v3 (probe + mirror + restore + anti-clobber).');
 })();

@@ -34,8 +34,8 @@
     panel.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(250,68,136,0.15);">' +
         '<b style="color:#ff9ec4;">CiDi report console</b>' +
-        '<span><button id="cc-clear" style="margin-right:6px;border:1px solid #fa4488;background:none;color:#ff9ec4;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:monospace;">limpar</button>' +
-        '<button id="cc-copy" style="margin-right:6px;border:1px solid #fa4488;background:none;color:#ff9ec4;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:monospace;">copiar</button>' +
+        '<span><button id="cc-clear" style="margin-right:6px;border:1px solid #fa4488;background:none;color:#ff9ec4;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:monospace;">clear</button>' +
+        '<button id="cc-copy" style="margin-right:6px;border:1px solid #fa4488;background:none;color:#ff9ec4;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:monospace;">copy</button>' +
         '<button id="cc-x" style="border:none;background:none;color:#fff;font-size:16px;cursor:pointer;">&times;</button></span>' +
       '</div>' +
       '<div id="cc-body" style="flex:1;overflow:auto;padding:8px 10px;line-height:1.5;"></div>';
@@ -44,7 +44,7 @@
     panel.querySelector('#cc-clear').onclick = function () { lines = []; render(); };
     panel.querySelector('#cc-copy').onclick = function () {
       var txt = lines.slice().reverse().map(function (l) { return '[' + l.t + '] ' + l.m; }).join('\n');
-      try { navigator.clipboard.writeText(txt); push('info', 'log copiado.'); } catch (e) { push('erro', 'copiar falhou'); }
+      try { navigator.clipboard.writeText(txt); push('info', 'log copied.'); } catch (e) { push('erro', 'copy failed'); }
     };
   }
   function render() {
@@ -70,7 +70,7 @@
         push('ok', label + ' -> ' + safe(r));
         return r;
       }, function (err) {
-        push('erro', label + ' FALHOU -> code=' + (err && (err.code || err.error)) + ' msg=' + (err && err.message) + ' ' + safe(err));
+        push('erro', label + ' FAILED -> code=' + (err && (err.code || err.error)) + ' msg=' + (err && err.message) + ' ' + safe(err));
         throw err;
       });
     };
@@ -88,7 +88,7 @@
       wrap(c.report, 'tournamentScore', 'report.tournamentScore');
     }
     wrapped = true;
-    push('info', 'console ligado - interceptando client.report.* e auth.login');
+    push('info', 'console on - intercepting client.report.* and auth.login');
   }
 
   // espelha logs de persistencia/storage na tela (diagnostico iOS)
@@ -100,8 +100,8 @@
           var a = Array.prototype.slice.call(arguments);
           var s = a.map(function (x) { return typeof x === 'string' ? x : safe(x); }).join(' ');
           if (/\[CiDi-(Persist|Storage|Login|Ad)\]/.test(s)) {
-            var kind = /PERSISTIU|OK|resolvido: true|restaurado/.test(s) ? 'ok'
-                     : /NAO|FALHOU|falhou|erro/.test(s) ? 'erro' : 'info';
+            var kind = /PERSISTED|OK| YES|resolved: true|restored/.test(s) ? 'ok'
+                     : /did NOT|NO previous|FAILED|failed|error/.test(s) ? 'erro' : 'info';
             push(kind, s.replace(/%c/g, '').replace(/color:[^;]+;?(font-weight:bold)?/g, '').trim());
           }
         } catch (e) {}
@@ -115,7 +115,7 @@
   setTimeout(function () { clearInterval(iv); }, 30000);
 
   // tambem loga o resultado do login automatico do boot
-  try { (window.__cidiLogin || Promise.resolve(false)).then(function (ok) { push(ok ? 'ok' : 'erro', 'boot login resolvido: ' + ok); }); } catch (e) {}
+  try { (window.__cidiLogin || Promise.resolve(false)).then(function (ok) { push(ok ? 'ok' : 'erro', 'boot login resolved: ' + ok); }); } catch (e) {}
 
   console.log('%c[CiDi-Console]', 'color:#fa4488', 'console de reports ativo (botao LOG).');
 })();
