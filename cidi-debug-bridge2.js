@@ -110,9 +110,22 @@
         .catch(function (e) { logln('login falhou: ' + (e && e.code) + ' ' + (e && e.message), false); });
     });
     bind('cdbg-t-ad', function () {
-      var fn = window.__cidiAdShow; if (!fn) { logln('funil de ad ausente', false); return; }
-      logln('showRewardedAd()...');
-      fn().then(function (ok) { logln('ad resultado: ' + ok, ok); });
+      var fn = window.__cidiAdShow; if (!fn) { logln('ad funnel missing', false); return; }
+      var s = stats();
+      var before = s ? (s.coins || 0) : 0;
+      logln('showRewardedAd()... (coins now: ' + before + ')');
+      fn().then(function (ok) {
+        logln('ad result: ' + ok, ok);
+        if (ok && s) {
+          s.coins = (s.coins || 0) + 100;            // credita +100 no sucesso
+          try { if (g().saveUserData) g().saveUserData(); } catch (e) {}
+          logln('granted +100 -> coins: ' + before + ' -> ' + s.coins + ' (saved). Close & reopen to verify persist.', true);
+          try { g().scene.scenes.forEach(function (sc) { if (sc.sys && sc.sys.isActive && sc.sys.isActive() && typeof sc.updateInfo === 'function') sc.updateInfo(); }); } catch (e) {}
+          refresh();
+        } else {
+          logln('no reward (ad not success) - coins unchanged: ' + before, false);
+        }
+      });
     });
     bind('cdbg-t-task', function () {
       if (!cli) { logln('sem client', false); return; }
