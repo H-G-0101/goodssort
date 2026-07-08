@@ -50,6 +50,8 @@
       row(m.ticks > 0, 'mirror ticks/writes', (m.ticks || 0) + ' / ' + (m.writes || 0)) +
       row(m.err ? false : null, 'mirror last', m.err ? ('ERR ' + m.err) : (m.last || '-')) +
       row(m.readback && m.readback.indexOf('MATCH')===0, 'mirror readback', m.readback || '-') +
+      row((window.__spy && window.__spy.byOther) ? false : null, 'writes mirror/other', (window.__spy ? (window.__spy.byMirror + ' / ' + window.__spy.byOther) : '-')) +
+      row(null, 'last OTHER write', (window.__spy && window.__spy.byOther) ? ('lvl' + window.__spy.lastOtherLv) : '-') +
       row(null, 'LS keys', (function(){ try { var a=[]; for (var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a.join(',').slice(0,60) || 'none'; } catch(e){ return 'err'; } })()) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
       row(typeof window.__cidiAdShow === 'function', 'ad funnel', typeof window.__cidiAdShow === 'function' ? 'ready' : 'no');
