@@ -81,29 +81,29 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=141"></script>
+  <script src="sdk-stub.js?v=142"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=141" defer="defer"></script>
-  <script src="shop-bridge.js?v=141" defer="defer"></script>
-  <script src="pause-bridge.js?v=141" defer="defer"></script>
-  <script src="settings-bridge.js?v=141" defer="defer"></script>
-  <script src="levelend-bridge.js?v=141" defer="defer"></script>
-  <script src="menu-bridge.js?v=141" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=141" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=141" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=141" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=141" defer="defer"></script>
-  <script src="ranking-bridge.js?v=141" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=141" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=142" defer="defer"></script>
+  <script src="shop-bridge.js?v=142" defer="defer"></script>
+  <script src="pause-bridge.js?v=142" defer="defer"></script>
+  <script src="settings-bridge.js?v=142" defer="defer"></script>
+  <script src="levelend-bridge.js?v=142" defer="defer"></script>
+  <script src="menu-bridge.js?v=142" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=142" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=142" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=142" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=142" defer="defer"></script>
+  <script src="ranking-bridge.js?v=142" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=142" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=141" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=141" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=141" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=141" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=141" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=141" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=142" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=142" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=142" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=142" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=142" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=142" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
@@ -145,7 +145,10 @@
       else console.log('[CiDi-Persist] no disk save yet (fresh).');
       console.log('[CiDi-Persist] GAME loaded -> level ' + gm.data.stats.currentCommonLevel + ' coins ' + gm.data.stats.coins);
       var bootedFresh = gm.data.stats.firstLoad === true;
-      var savedReal = disk && disk.stats && disk.stats.firstLoad === false;
+      // so restaura se o disco tiver MAIS progresso que o estado atual (evita puxar um save lv1 velho)
+      var diskLv = disk && disk.stats ? (disk.stats.currentCommonLevel || 0) : 0;
+      var gameLv = gm.data.stats.currentCommonLevel || 0;
+      var savedReal = disk && disk.stats && disk.stats.firstLoad === false && diskLv >= gameLv;
       if (bootedFresh && savedReal) {
         gm.data = disk;
         console.log('[CiDi-Storage] persisted state restored after init.');
@@ -169,6 +172,31 @@
   });
   console.log('%c[CiDi-Storage]', 'color:#2bb583', 'persistence SIMPLE (re-read after init, native save).');
 
+  // MIRROR SIMPLES: o jogo grava o save no boot mas nao o atualiza depois (DISK ficava lv1).
+  // Copiamos game.data -> disco a cada 1s (e ao fechar). NAO tocamos em saveUserData
+  // (envolve-lo quebrou o save nativo em v71+). So escrevemos quando ha progresso real.
+  (function () {
+    var KEY = 'grocery-store_sgk', lastLv = null;
+    function g() { return window.__game; }
+    function isFresh(d) {
+      if (!d || !d.stats) return true; var s = d.stats;
+      return (s.currentCommonLevel || 1) <= 1 && !(s.coins > 0) && !(s.score > 0);
+    }
+    function write() {
+      try {
+        var gm = g(); if (!gm || !gm.data || !gm.data.stats) return;
+        if (isFresh(gm.data)) return;                 // nunca sobrescreve com defaults
+        localStorage.setItem(KEY, JSON.stringify(gm.data));
+        var lv = gm.data.stats.currentCommonLevel;
+        if (lv !== lastLv) { lastLv = lv; console.log('[CiDi-Persist] mirror saved -> level ' + lv + ' coins ' + gm.data.stats.coins); }
+      } catch (e) {}
+    }
+    setInterval(write, 1000);
+    ['pagehide','beforeunload','freeze','blur'].forEach(function (ev) { try { window.addEventListener(ev, write, { capture: true }); } catch (e) {} });
+    try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') write(); }, { capture: true }); } catch (e) {}
+  })();
+
+
   // OBSERVADOR PASSIVO: nao toca no save do jogo; so verifica a cada 1s se a chave existe/mudou.
   // Assim vemos no dbg se o jogo esta escrevendo no disco.
   (function () {
@@ -190,7 +218,7 @@
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=141"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=142"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -199,7 +227,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=141" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=142" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>
