@@ -10,7 +10,7 @@
 
   function g() { return window.__game; }
   function stats() { try { return g().data.stats; } catch (e) { return null; } }
-  function readSaved() { try { var r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function readSaved() { try { var r = window.localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
   function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; }); }
   function safe(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return '' + v; } }
 
@@ -50,8 +50,6 @@
       row(m.ticks > 0, 'mirror ticks/writes', (m.ticks || 0) + ' / ' + (m.writes || 0)) +
       row(m.err ? false : null, 'mirror last', m.err ? ('ERR ' + m.err) : (m.last || '-')) +
       row(m.readback && m.readback.indexOf('MATCH')===0, 'mirror readback', m.readback || '-') +
-      row((window.__spy && window.__spy.byOther) ? false : null, 'writes mirror/other', (window.__spy ? (window.__spy.byMirror + ' / ' + window.__spy.byOther) : '-')) +
-      row(null, 'last OTHER write', (window.__spy && window.__spy.byOther) ? ('lvl' + window.__spy.lastOtherLv) : '-') +
       row(null, 'LS keys', (function(){ try { var a=[]; for (var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a.join(',').slice(0,60) || 'none'; } catch(e){ return 'err'; } })()) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
       row(typeof window.__cidiAdShow === 'function', 'ad funnel', typeof window.__cidiAdShow === 'function' ? 'ready' : 'no');
