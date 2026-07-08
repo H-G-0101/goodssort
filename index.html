@@ -45,7 +45,7 @@
     });
   })();
   </script>
-  <script>window.__BUILD__='v92';console.log('[CiDi-Persist] BUILD v92 loaded');</script>
+  <script>window.__BUILD__='v93';console.log('[CiDi-Persist] BUILD v93 loaded');</script>
   <script>
   /* SPY DE STORAGE - roda ANTES de tudo. Nao altera comportamento; so LOGA quem apaga/grava
      a chave do save, com stack, p/ o painel dbg mostrar. Remover no build final. */
@@ -99,29 +99,29 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=147"></script>
+  <script src="sdk-stub.js?v=148"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=147" defer="defer"></script>
-  <script src="shop-bridge.js?v=147" defer="defer"></script>
-  <script src="pause-bridge.js?v=147" defer="defer"></script>
-  <script src="settings-bridge.js?v=147" defer="defer"></script>
-  <script src="levelend-bridge.js?v=147" defer="defer"></script>
-  <script src="menu-bridge.js?v=147" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=147" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=147" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=147" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=147" defer="defer"></script>
-  <script src="ranking-bridge.js?v=147" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=147" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=148" defer="defer"></script>
+  <script src="shop-bridge.js?v=148" defer="defer"></script>
+  <script src="pause-bridge.js?v=148" defer="defer"></script>
+  <script src="settings-bridge.js?v=148" defer="defer"></script>
+  <script src="levelend-bridge.js?v=148" defer="defer"></script>
+  <script src="menu-bridge.js?v=148" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=148" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=148" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=148" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=148" defer="defer"></script>
+  <script src="ranking-bridge.js?v=148" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=148" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=147" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=147" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=147" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=147" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=147" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=147" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=148" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=148" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=148" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=148" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=148" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=148" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
@@ -141,15 +141,19 @@
   function write(tag) {
     try {
       var gm = g();
-      if (!gm || !gm.data || !gm.data.stats) { if (diag++ < 3) console.warn('[CiDi-Persist] mirror: no __game yet'); return; }
+      if (!gm || !gm.data || !gm.data.stats) { window.__mirror = window.__mirror || {}; window.__mirror.ticks = (window.__mirror.ticks||0)+1; window.__mirror.last='no __game'; return; }
       var st = gm.data.stats;
-      if (diag++ < 3) console.log('[CiDi-Persist] mirror sees -> lvl ' + st.currentCommonLevel + ' coins ' + st.coins + ' fresh=' + fresh(gm.data));
-      if (fresh(gm.data)) return;
+      window.__mirror = window.__mirror || {};
+      window.__mirror.ticks = (window.__mirror.ticks || 0) + 1;
+      window.__mirror.sees = 'lvl ' + st.currentCommonLevel + ' c' + st.coins + ' fresh=' + fresh(gm.data);
+      if (fresh(gm.data)) { window.__mirror.last = 'skipped (fresh)'; return; }
       var json = JSON.stringify(gm.data);
       localStorage.setItem(KEY, json);
+      window.__mirror.writes = (window.__mirror.writes || 0) + 1;
+      window.__mirror.last = 'wrote lvl ' + st.currentCommonLevel + ' c' + st.coins + ' @' + (tag || 'tick');
       var sig = st.currentCommonLevel + ':' + st.coins;
       if (sig !== lastSig) { lastSig = sig; console.log('[CiDi-Persist] mirror saved (' + (tag || 'tick') + ') -> lvl ' + st.currentCommonLevel + ' coins ' + st.coins); }
-    } catch (e) { console.warn('[CiDi-Persist] mirror write error: ' + (e && e.message)); }
+    } catch (e) { window.__mirror = window.__mirror || {}; window.__mirror.err = (e && e.message) || 'err'; console.warn('[CiDi-Persist] mirror write error: ' + (e && e.message)); }
   }
   try { setInterval(function () { write('tick'); }, 1000); } catch (e) {}
   ['pagehide', 'beforeunload', 'blur'].forEach(function (ev) {
@@ -207,7 +211,7 @@
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=147"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=148"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -216,7 +220,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=147" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=148" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>

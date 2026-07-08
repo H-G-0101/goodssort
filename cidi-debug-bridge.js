@@ -34,7 +34,7 @@
   }
   function renderStatus() {
     if (!statusEl) return;
-    var s = stats(), disk = readSaved();
+    var s = stats(), disk = readSaved(), m = window.__mirror || {};
     var hasSDK = !!(window.CiDiSDK);
     var wr = writeReadTest();
     var probe = null; try { probe = localStorage.getItem(PROBE_KEY); } catch (e) {}
@@ -47,6 +47,8 @@
       row(!!disk, 'disk save exists', disk ? 'yes' : 'no') +
       row(disk ? null : false, 'DISK  lvl / coins', disk && disk.stats ? ('lvl ' + disk.stats.currentCommonLevel + ' \u00b7 ' + disk.stats.coins + 'c') : '-') +
       row(s ? null : false, 'GAME  lvl / coins', s ? ('lvl ' + s.currentCommonLevel + ' \u00b7 ' + s.coins + 'c') : '-') +
+      row(m.ticks > 0, 'mirror ticks/writes', (m.ticks || 0) + ' / ' + (m.writes || 0)) +
+      row(m.err ? false : null, 'mirror last', m.err ? ('ERR ' + m.err) : (m.last || '-')) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
       row(typeof window.__cidiAdShow === 'function', 'ad funnel', typeof window.__cidiAdShow === 'function' ? 'ready' : 'no');
   }
