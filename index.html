@@ -53,29 +53,29 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=139"></script>
+  <script src="sdk-stub.js?v=140"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=139" defer="defer"></script>
-  <script src="shop-bridge.js?v=139" defer="defer"></script>
-  <script src="pause-bridge.js?v=139" defer="defer"></script>
-  <script src="settings-bridge.js?v=139" defer="defer"></script>
-  <script src="levelend-bridge.js?v=139" defer="defer"></script>
-  <script src="menu-bridge.js?v=139" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=139" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=139" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=139" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=139" defer="defer"></script>
-  <script src="ranking-bridge.js?v=139" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=139" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=140" defer="defer"></script>
+  <script src="shop-bridge.js?v=140" defer="defer"></script>
+  <script src="pause-bridge.js?v=140" defer="defer"></script>
+  <script src="settings-bridge.js?v=140" defer="defer"></script>
+  <script src="levelend-bridge.js?v=140" defer="defer"></script>
+  <script src="menu-bridge.js?v=140" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=140" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=140" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=140" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=140" defer="defer"></script>
+  <script src="ranking-bridge.js?v=140" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=140" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=139" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=139" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=139" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=139" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=139" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=139" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=140" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=140" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=140" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=140" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=140" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=140" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
@@ -140,10 +140,29 @@
     setTimeout(function () { clearInterval(iv); }, 15000);
   });
   console.log('%c[CiDi-Storage]', 'color:#2bb583', 'persistence SIMPLE (re-read after init, native save).');
+
+  // OBSERVADOR PASSIVO: nao toca no save do jogo; so verifica a cada 1s se a chave existe/mudou.
+  // Assim vemos no dbg se o jogo esta escrevendo no disco.
+  (function () {
+    var last = null;
+    setInterval(function () {
+      try {
+        var raw = localStorage.getItem('grocery-store_sgk');
+        var lv = raw ? (JSON.parse(raw).stats || {}).currentCommonLevel : null;
+        var sig = raw ? ('lv' + lv + ':' + raw.length) : 'NONE';
+        if (sig !== last) {
+          last = sig;
+          if (raw) console.log('[CiDi-Persist] disk save WRITTEN -> level ' + lv + ' (bytes ' + raw.length + ')');
+          else console.warn('[CiDi-Persist] disk save MISSING (game is not writing)');
+        }
+      } catch (e) {}
+    }, 1000);
+  })();
+
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=139"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=140"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -152,7 +171,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=139" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=140" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>
