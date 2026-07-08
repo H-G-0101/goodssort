@@ -40,6 +40,7 @@
     var probe = null; try { probe = localStorage.getItem(PROBE_KEY); } catch (e) {}
     statusEl.innerHTML =
       row(hasSDK, 'CiDiSDK loaded', hasSDK ? 'yes' : 'NO') +
+      row(window.__cidiInitState === 'ok' ? true : window.__cidiInitState === 'failed' ? false : null, 'CiDi init()', window.__cidiInitState || 'pending') +
       row(wr, 'localStorage write/read', wr ? 'OK' : 'FAILED') +
       row(!!probe, 'persist probe', probe ? 'survived' : 'none') +
       row(!!disk, 'disk save exists', disk ? 'yes' : 'no') +
