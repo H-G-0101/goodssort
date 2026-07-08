@@ -28,6 +28,34 @@
   -->
   <!-- ===== CiDi Storage SDK: init() ANTES de tudo (localStorage do Pi Browser) ===== -->
   <!-- URL versionada p/ evitar cache velho (recomendacao da doc CiDi). -->
+  <script>
+  /* SPY DE STORAGE - roda ANTES de tudo. Nao altera comportamento; so LOGA quem apaga/grava
+     a chave do save, com stack, p/ o painel dbg mostrar. Remover no build final. */
+  (function () {
+    var KEY = 'grocery-store_sgk';
+    try {
+      var proto = Object.getPrototypeOf(localStorage) || Storage.prototype;
+      var _set = proto.setItem, _rm = proto.removeItem, _clr = proto.clear;
+      proto.setItem = function (k, v) {
+        if (k === KEY) { try { console.log('[CiDi-Persist] setItem(' + k + ') bytes=' + String(v).length); } catch(e){} }
+        return _set.apply(this, arguments);
+      };
+      proto.removeItem = function (k) {
+        if (k === KEY) {
+          var st = ''; try { st = (new Error()).stack || ''; } catch (e) {}
+          console.warn('[CiDi-Persist] removeItem(' + k + ') !!! CULPRIT: ' + st.split('\n').slice(1,4).join(' | '));
+        }
+        return _rm.apply(this, arguments);
+      };
+      proto.clear = function () {
+        var st = ''; try { st = (new Error()).stack || ''; } catch (e) {}
+        console.warn('[CiDi-Persist] localStorage.clear() !!! CULPRIT: ' + st.split('\n').slice(1,4).join(' | '));
+        return _clr.apply(this, arguments);
+      };
+      console.log('[CiDi-Persist] storage spy armed');
+    } catch (e) { console.warn('[CiDi-Persist] spy failed', e); }
+  })();
+  </script>
   <script src="https://app.cidi.games/sdk/cidi-sdk.js?v=20260427-expose-init-await-pi-init-1"></script>
   <script>
   /* Dispara CiDiSDK.init() imediatamente, ANTES do game.
@@ -53,29 +81,29 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=140"></script>
+  <script src="sdk-stub.js?v=141"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=140" defer="defer"></script>
-  <script src="shop-bridge.js?v=140" defer="defer"></script>
-  <script src="pause-bridge.js?v=140" defer="defer"></script>
-  <script src="settings-bridge.js?v=140" defer="defer"></script>
-  <script src="levelend-bridge.js?v=140" defer="defer"></script>
-  <script src="menu-bridge.js?v=140" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=140" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=140" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=140" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=140" defer="defer"></script>
-  <script src="ranking-bridge.js?v=140" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=140" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=141" defer="defer"></script>
+  <script src="shop-bridge.js?v=141" defer="defer"></script>
+  <script src="pause-bridge.js?v=141" defer="defer"></script>
+  <script src="settings-bridge.js?v=141" defer="defer"></script>
+  <script src="levelend-bridge.js?v=141" defer="defer"></script>
+  <script src="menu-bridge.js?v=141" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=141" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=141" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=141" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=141" defer="defer"></script>
+  <script src="ranking-bridge.js?v=141" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=141" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=140" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=140" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=140" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=140" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=140" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=140" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=141" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=141" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=141" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=141" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=141" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=141" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
@@ -162,7 +190,7 @@
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=140"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=141"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -171,7 +199,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=140" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=141" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>
