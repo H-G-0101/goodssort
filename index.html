@@ -28,6 +28,7 @@
   -->
   <!-- ===== CiDi Storage SDK: init() ANTES de tudo (localStorage do Pi Browser) ===== -->
   <!-- URL versionada p/ evitar cache velho (recomendacao da doc CiDi). -->
+  <script>window.__BUILD__='v88';console.log('[CiDi-Persist] BUILD v88 loaded');</script>
   <script>
   /* SPY DE STORAGE - roda ANTES de tudo. Nao altera comportamento; so LOGA quem apaga/grava
      a chave do save, com stack, p/ o painel dbg mostrar. Remover no build final. */
@@ -81,29 +82,29 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=142"></script>
+  <script src="sdk-stub.js?v=143"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=142" defer="defer"></script>
-  <script src="shop-bridge.js?v=142" defer="defer"></script>
-  <script src="pause-bridge.js?v=142" defer="defer"></script>
-  <script src="settings-bridge.js?v=142" defer="defer"></script>
-  <script src="levelend-bridge.js?v=142" defer="defer"></script>
-  <script src="menu-bridge.js?v=142" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=142" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=142" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=142" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=142" defer="defer"></script>
-  <script src="ranking-bridge.js?v=142" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=142" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=143" defer="defer"></script>
+  <script src="shop-bridge.js?v=143" defer="defer"></script>
+  <script src="pause-bridge.js?v=143" defer="defer"></script>
+  <script src="settings-bridge.js?v=143" defer="defer"></script>
+  <script src="levelend-bridge.js?v=143" defer="defer"></script>
+  <script src="menu-bridge.js?v=143" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=143" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=143" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=143" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=143" defer="defer"></script>
+  <script src="ranking-bridge.js?v=143" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=143" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=142" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=142" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=142" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=142" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=142" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=142" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=143" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=143" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=143" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=143" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=143" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=143" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
@@ -218,7 +219,7 @@
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=142"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=143"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -227,7 +228,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=142" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=143" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>

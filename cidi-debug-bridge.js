@@ -39,6 +39,7 @@
     var wr = writeReadTest();
     var probe = null; try { probe = localStorage.getItem(PROBE_KEY); } catch (e) {}
     statusEl.innerHTML =
+      row(!!window.__BUILD__, 'BUILD', window.__BUILD__ || 'OLD/unknown') +
       row(hasSDK, 'CiDiSDK loaded', hasSDK ? 'yes' : 'NO') +
       row(window.__cidiInitState === 'ok' ? true : window.__cidiInitState === 'failed' ? false : null, 'CiDi init()', window.__cidiInitState || 'pending') +
       row(wr, 'localStorage write/read', wr ? 'OK' : 'FAILED') +
