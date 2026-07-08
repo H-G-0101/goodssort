@@ -1,170 +1,128 @@
 /*
- * cidi-debug-bridge.js  -  painel DEBUG dos SDKs CiDi (so na HOME/cena Menu).
- * Mostra status ao vivo: Storage(init), Login, Ad, Task, Tournament, Medal + flags locais.
- * Botoes de teste executam chamadas REAIS (ad conta como ad; task/tournament reportam mesmo).
- * Para remover na versao final: apague este arquivo e a linha dele no index.html.
+ * cidi-debug-bridge.js  -  painel DEBUG estilo Bus Jam: STATUS ao vivo + LOG corrido.
+ * (sem grade de botoes). Mostra o estado da persistencia continuamente pra diagnosticar
+ * o "nao salva". Captura linhas [CiDi-*] do console + envolve client.report.* / auth.login.
+ * Toggle: pequeno botao 'dbg' no canto. Para remover na final: comentar a linha no index.html.
  */
 (function () {
-  var FLAGS_KEY = 'grocery-store_cidi', SAVE_KEY = 'grocery-store_sgk', MEDAL_LEVEL = 100;
-  var btn = null, panel = null, open = false, readyState = 'pendente';
-
-  // registra resultado do init (promise exposta no <head>)
-  try { (window.__cidiReady || Promise.resolve(false)).then(function (ok) { readyState = ok ? 'OK' : 'falhou/ausente'; }); } catch (e) {}
+  var SAVE_KEY = 'grocery-store_sgk', PROBE_KEY = '__cidi_persist_probe';
+  var lines = [], MAX = 250, open = false, panel = null, toggle = null, statusEl = null, logEl = null;
 
   function g() { return window.__game; }
   function stats() { try { return g().data.stats; } catch (e) { return null; } }
-  function onHome() { try { return g().scene.isActive('Menu'); } catch (e) { return false; } }
-  function levelsDone() { var s = stats(); if (!s) return 0;
-    return Math.max(0, (s.currentCommonLevel || 1) - 1) + Math.max(0, (s.currentRelaxLevel || 1) - 1); }
-  function flags() { try { return JSON.parse(localStorage.getItem(FLAGS_KEY) || '{}'); } catch (e) { return {}; } }
-  function dot(ok) { // verde / vermelho / amarelo(null=parcial)
-    var c = ok === true ? '#3ddc84' : ok === false ? '#ff5a4e' : '#ffc93d';
-    return '<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:' + c + ';margin-right:8px;flex:0 0 auto;"></span>';
-  }
-  function esc(s) { return String(s).replace(/</g, '&lt;'); }
-  function logln(msg, ok) {
-    var el = panel && panel.querySelector('#cdbg-log'); if (!el) return;
+  function readSaved() { try { var r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; }); }
+  function safe(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return '' + v; } }
+
+  function push(kind, msg) {
     var t = new Date().toTimeString().slice(0, 8);
-    el.innerHTML = '<div style="color:' + (ok === false ? '#ff8d84' : ok === true ? '#7ee2a8' : '#ddd') + '">[' + t + '] ' + esc(msg) + '</div>' + el.innerHTML;
+    lines.unshift({ k: kind, t: t, m: msg });
+    if (lines.length > MAX) lines.pop();
+    renderLog();
   }
 
-  function rows() {
-    var s = stats(), f = flags();
-    var hasSDK = !!(window.CiDiSDK && typeof CiDiSDK.showRewardedAd === 'function');
-    var hasProxy = (typeof window.CidiProxySDK !== 'undefined');
-    var cli = !!window.__cidiClient;
-    var logged = window.__cidiLoggedIn === true;
-    var lv = levelsDone();
-    function row(ok, name, detail, btnId, btnTxt) {
-      return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);">' +
-        dot(ok) + '<div style="flex:1;min-width:0;"><b>' + name + '</b>' +
-        '<div style="font-size:11px;opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + detail + '</div></div>' +
-        (btnId ? '<button id="' + btnId + '" style="flex:0 0 auto;padding:6px 10px;border-radius:10px;border:1px solid #7d5fe2;background:#4a3f6e;color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">' + btnTxt + '</button>' : '') +
-        '</div>';
-    }
-    return row(readyState === 'OK' ? true : (readyState === 'pendente' ? null : false),
-               'Storage (init)', 'CiDiSDK: ' + (window.CiDiSDK ? 'carregado' : 'AUSENTE') + ' &middot; init: ' + readyState, 'cdbg-t-sto', 'testar') +
-           row(cli && logged ? true : (cli ? null : false),
-               'Login', 'proxy: ' + (hasProxy ? 'ok' : 'AUSENTE') + ' &middot; client: ' + (cli ? 'ok' : 'nao') + ' &middot; logado: ' + (logged ? 'SIM' : 'nao'), 'cdbg-t-log', 'login') +
-           row(hasSDK ? true : false,
-               'Ad (rewarded)', 'funil: ' + (typeof window.__cidiAdShow === 'function' ? 'ok' : 'AUSENTE') + ' &middot; CiDiSDK.showRewardedAd: ' + (hasSDK ? 'ok' : 'nao'), 'cdbg-t-ad', 'testar ad') +
-           row(cli ? (f.taskDate ? true : null) : false,
-               'Task (diaria)', 'reportada hoje: ' + (f.taskDate || 'nao') + (f.taskPending ? ' &middot; PENDENTE ' + f.taskPending : ''), 'cdbg-t-task', 'checar') +
-           row(cli ? ((f.tournPending || 0) > 0 ? null : true) : false,
-               'Tournament', 'score atual: ' + (s ? (s.score || 0) : '?') + ' &middot; pendente: ' + (f.tournPending || 0), 'cdbg-t-tour', 'reportar') +
-           row(cli ? (f.medalClaimed ? true : null) : false,
-               'Medal', 'niveis: ' + lv + '/' + MEDAL_LEVEL + ' &middot; claim local: ' + (f.medalClaimed ? 'SIM' : 'nao'), 'cdbg-t-med', 'claim');
+  // ---- STATUS ao vivo ----
+  function row(ok, label, val) {
+    var c = ok === true ? '#5fe39b' : ok === false ? '#ff8d9b' : '#ffd24a';
+    return '<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;">' +
+      '<span style="color:#9fb0d8;">' + label + '</span>' +
+      '<span style="color:' + c + ';font-weight:700;text-align:right;">' + esc(val) + '</span></div>';
+  }
+  function writeReadTest() {
+    try { var k = '__cidi_wr', v = '' + Date.now(); localStorage.setItem(k, v); var r = localStorage.getItem(k); localStorage.removeItem(k); return r === v; }
+    catch (e) { return false; }
+  }
+  function renderStatus() {
+    if (!statusEl) return;
+    var s = stats(), disk = readSaved();
+    var hasSDK = !!(window.CiDiSDK);
+    var wr = writeReadTest();
+    var probe = null; try { probe = localStorage.getItem(PROBE_KEY); } catch (e) {}
+    statusEl.innerHTML =
+      row(hasSDK, 'CiDiSDK loaded', hasSDK ? 'yes' : 'NO') +
+      row(wr, 'localStorage write/read', wr ? 'OK' : 'FAILED') +
+      row(!!probe, 'persist probe', probe ? 'survived' : 'none') +
+      row(!!disk, 'disk save exists', disk ? 'yes' : 'no') +
+      row(disk ? null : false, 'DISK level / coins', disk && disk.stats ? (disk.stats.currentCommonLevel + ' / ' + disk.stats.coins) : '-') +
+      row(s ? null : false, 'GAME level / coins', s ? (s.currentCommonLevel + ' / ' + s.coins) : '-') +
+      row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
+      row(typeof window.__cidiAdShow === 'function', 'ad funnel', typeof window.__cidiAdShow === 'function' ? 'ready' : 'no');
+  }
+  function renderLog() {
+    if (!logEl) return;
+    logEl.innerHTML = lines.map(function (l) {
+      var col = l.k === 'ok' ? '#7ee2a8' : l.k === 'bad' ? '#ff8d84' : l.k === 'evt' ? '#ffd479' : '#9ecbff';
+      return '<div style="color:' + col + ';border-bottom:1px solid rgba(255,255,255,.06);padding:1px 0;">[' + l.t + '] ' + esc(l.m) + '</div>';
+    }).join('');
   }
 
   function build() {
-    if (btn) return;
-    btn = document.createElement('button');
-    btn.textContent = 'SDK';
-    btn.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:70000;display:none;width:52px;height:34px;' +
-      'border-radius:10px;border:2px solid #7d5fe2;background:rgba(40,32,70,0.92);color:#cfc3ff;' +
-      'font-family:"Baloo 2",monospace;font-weight:800;font-size:13px;letter-spacing:1px;cursor:pointer;';
-    btn.onclick = function () { open = !open; panel.style.display = open ? 'block' : 'none'; if (open) refresh(); };
-    document.body.appendChild(btn);
+    if (toggle) return;
+    toggle = document.createElement('button');
+    toggle.textContent = 'dbg';
+    toggle.style.cssText = 'position:fixed;right:10px;bottom:10px;z-index:90000;width:52px;height:32px;border-radius:9px;' +
+      'background:rgba(16,20,40,.92);border:1.5px solid #3fd0ff;color:#aef3ff;font-family:ui-monospace,monospace;font-weight:800;font-size:12px;cursor:pointer;';
+    toggle.onclick = function () { open = !open; panel.style.display = open ? 'flex' : 'none'; if (open) { renderStatus(); renderLog(); } };
+    document.body.appendChild(toggle);
 
     panel = document.createElement('div');
-    panel.style.cssText = 'position:fixed;left:10px;bottom:52px;z-index:70000;display:none;width:320px;max-width:92vw;' +
-      'max-height:70vh;overflow:auto;padding:12px 14px;border-radius:14px;border:2px solid #7d5fe2;' +
-      'background:rgba(24,19,44,0.96);color:#eee;font-family:"Baloo 2",system-ui,sans-serif;font-size:13px;';
-    document.body.appendChild(panel);
-  }
-
-  function refresh() {
-    if (!panel) return;
-    var old = panel.querySelector('#cdbg-log');
-    var oldLog = old ? old.innerHTML : '';
+    panel.style.cssText = 'position:fixed;left:8px;right:8px;bottom:50px;z-index:90000;display:none;flex-direction:column;max-height:72vh;' +
+      'background:linear-gradient(180deg,rgba(16,20,40,.98),rgba(8,10,22,.99));border:1px solid rgba(63,208,255,.4);border-radius:14px;' +
+      'font-family:ui-monospace,Menlo,monospace;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.7);';
     panel.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">' +
-        '<b style="font-size:15px;color:#cfc3ff;">CiDi SDKs - debug</b>' +
-        '<button id="cdbg-x" style="border:none;background:none;color:#fff;font-size:18px;cursor:pointer;font-weight:800;">&times;</button></div>' +
-      rows() +
-      '<div style="margin-top:8px;font-size:11px;opacity:.7;">log key: ' + FLAGS_KEY + ' &middot; save: ' + SAVE_KEY + '</div>' +
-      '<div id="cdbg-log" style="margin-top:6px;max-height:130px;overflow:auto;font-family:monospace;font-size:11px;background:rgba(0,0,0,0.3);border-radius:8px;padding:6px;">' + oldLog + '</div>';
-    panel.querySelector('#cdbg-x').onclick = function () { open = false; panel.style.display = 'none'; };
-    bindTests();
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(63,208,255,.1);border-bottom:1px solid rgba(255,255,255,.1);">' +
+        '<b style="color:#aef3ff;font-size:13px;">CiDi debug</b>' +
+        '<span><button id="cd-copy" style="margin-right:6px;border:1px solid #3fd0ff;background:none;color:#aef3ff;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;">copy</button>' +
+        '<button id="cd-clear" style="margin-right:6px;border:1px solid #3fd0ff;background:none;color:#aef3ff;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;">clear</button>' +
+        '<button id="cd-x" style="border:none;background:none;color:#fff;font-size:15px;cursor:pointer;">&times;</button></span></div>' +
+      '<div id="cd-status" style="padding:8px 12px;font-size:11.5px;border-bottom:1px solid rgba(255,255,255,.08);"></div>' +
+      '<div id="cd-log" style="flex:1;overflow:auto;padding:8px 12px;font-size:11px;line-height:1.5;"></div>';
+    document.body.appendChild(panel);
+    statusEl = panel.querySelector('#cd-status'); logEl = panel.querySelector('#cd-log');
+    panel.querySelector('#cd-x').onclick = function () { open = false; panel.style.display = 'none'; };
+    panel.querySelector('#cd-clear').onclick = function () { lines = []; renderLog(); };
+    panel.querySelector('#cd-copy').onclick = function () {
+      var txt = lines.slice().reverse().map(function (l) { return '[' + l.t + '] ' + l.m; }).join('\n');
+      try { navigator.clipboard.writeText(txt); push('info', 'log copied'); } catch (e) {}
+    };
   }
 
-  function bindTests() {
-    var cli = window.__cidiClient;
-    function bind(id, fn) { var b = panel.querySelector('#' + id); if (b) b.onclick = fn; }
-    bind('cdbg-t-sto', function () {   // roundtrip de localStorage
-      try { var k = '__cidi_dbg', v = String(Date.now());
-        localStorage.setItem(k, v); var r = localStorage.getItem(k); localStorage.removeItem(k);
-        logln('storage roundtrip: ' + (r === v ? 'OK' : 'FALHOU'), r === v);
-      } catch (e) { logln('storage erro: ' + e.message, false); }
-    });
-    bind('cdbg-t-log', function () {
-      var ens = window.__cidiEnsureLogin;
-      if (typeof ens === 'function') {
-        logln('ensureLogin()...');
-        ens().then(function (ok) { logln('login: ' + (ok ? 'OK' : 'falhou'), ok); refresh(); });
-        return;
-      }
-      if (!cli) { logln('sem client (proxy nao carregou?)', false); return; }
-      logln('login()...');
-      cli.auth.login().then(function () { window.__cidiLoggedIn = true; logln('login OK', true); refresh(); })
-        .catch(function (e) { logln('login falhou: ' + (e && e.code) + ' ' + (e && e.message), false); });
-    });
-    bind('cdbg-t-ad', function () {
-      var fn = window.__cidiAdShow; if (!fn) { logln('ad funnel missing', false); return; }
-      var s = stats();
-      var before = s ? (s.coins || 0) : 0;
-      logln('showRewardedAd()... (coins now: ' + before + ')');
-      fn().then(function (ok) {
-        logln('ad result: ' + ok, ok);
-        if (ok && s) {
-          s.coins = (s.coins || 0) + 100;            // credita +100 no sucesso
-          try { if (g().saveUserData) g().saveUserData(); } catch (e) {}
-          logln('granted +100 -> coins: ' + before + ' -> ' + s.coins + ' (saved). Close & reopen to verify persist.', true);
-          try { g().scene.scenes.forEach(function (sc) { if (sc.sys && sc.sys.isActive && sc.sys.isActive() && typeof sc.updateInfo === 'function') sc.updateInfo(); }); } catch (e) {}
-          refresh();
-        } else {
-          logln('no reward (ad not success) - coins unchanged: ' + before, false);
+  // captura console [CiDi-*]
+  ['log', 'warn', 'error'].forEach(function (m) {
+    var orig = console[m] ? console[m].bind(console) : function () {};
+    console[m] = function () {
+      try {
+        var s = Array.prototype.slice.call(arguments).map(function (x) { return typeof x === 'string' ? x : safe(x); }).join(' ');
+        if (/\[CiDi-(Persist|Storage|Login|Ad|Report)\]/.test(s)) {
+          var kind = /PERSISTED|OK|resolved: true| YES|restored|saved -> |FLUSH/.test(s) ? 'ok'
+                   : /did NOT|FAILED|failed|error|bad/.test(s) ? 'bad' : 'evt';
+          push(kind, s.replace(/%c/g, '').replace(/color:[^;]+;?(font-weight:bold)?/g, '').trim());
         }
-      });
-    });
-    bind('cdbg-t-task', function () {
-      if (!cli) { logln('sem client', false); return; }
-      var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
-      var bd = '' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
-      logln('gameTaskResult(' + bd + ')...');
-      cli.report.gameTaskResult({ bizDate: bd })
-        .then(function (r) { logln('task hoje: ' + JSON.stringify(r), true); })
-        .catch(function (e) { logln('taskResult falhou: ' + (e && e.code) + ' ' + (e && e.message), false); });
-    });
-    bind('cdbg-t-tour', function () {
-      if (!cli) { logln('sem client', false); return; }
-      var s = stats(); var sc = s ? (s.score || 0) : 0;
-      logln('tournamentScore(' + sc + ')...');
-      cli.report.tournamentScore({ score: String(sc), reportedAt: Math.floor(Date.now() / 1000) })
-        .then(function (r) { logln('tournament: ' + r, r === true); })
-        .catch(function (e) { logln('tournament falhou: ' + (e && e.code) + ' ' + (e && e.message), false); });
-    });
-    bind('cdbg-t-med', function () {
-      if (!cli) { logln('sem client', false); return; }
-      logln('report.medal() [claim de teste]...');
-      cli.report.medal()
-        .then(function (r) {
-          logln('medal(claim): ' + JSON.stringify(r), r === true || (r && r.success));
-          // confirma ownership depois do claim
-          return cli.report.medalOwnership().then(function (o) { logln('ownership: ' + JSON.stringify(o), !!(o && o.owned)); });
-        })
-        .catch(function (e) { logln('medal falhou: ' + (e && e.code) + ' ' + (e && e.message), false); });
-    });
+      } catch (e) {}
+      return orig.apply(null, arguments);
+    };
+  });
+
+  // envolve report.* + auth.login (loga chamada/retorno)
+  var wrapped = false;
+  function wrap(o, n, label) {
+    if (!o || typeof o[n] !== 'function' || o['__cd_' + n]) return;
+    var orig = o[n].bind(o); o['__cd_' + n] = true;
+    o[n] = function () {
+      var args = [].slice.call(arguments);
+      push('evt', label + '(' + args.map(safe).join(', ') + ')');
+      return Promise.resolve(orig.apply(null, args)).then(function (r) { push('ok', label + ' -> ' + safe(r)); return r; },
+        function (e) { push('bad', label + ' FAILED -> ' + (e && (e.code || e.error)) + ' ' + (e && e.message)); throw e; });
+    };
+  }
+  function tryWrap() {
+    var c = window.__cidiClient; if (!c || wrapped) return;
+    if (c.auth) wrap(c.auth, 'login', 'auth.login');
+    if (c.report) { ['medal', 'medalOwnership', 'gameTask', 'gameTaskResult', 'tournamentScore'].forEach(function (n) { wrap(c.report, n, 'report.' + n); }); }
+    wrapped = true; push('info', 'debug ready - watching persistence + CiDi reports');
   }
 
-  setInterval(function () {
-    if (!g()) return;
-    build();
-    var home = onHome();
-    btn.style.display = home ? 'block' : 'none';
-    if (!home && open) { open = false; panel.style.display = 'none'; }
-    if (open) refresh();
-  }, 1000);
-
-  console.log('%c[CiDi-Debug]', 'color:#ffc93d', 'painel SDK ativo (botao na home).');
+  build();
+  setInterval(function () { if (g()) { build(); tryWrap(); if (open) renderStatus(); } }, 1000);
+  console.log('%c[CiDi-Debug]', 'color:#3fd0ff', 'Bus Jam-style status+log panel ready.');
 })();
