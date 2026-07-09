@@ -68,15 +68,32 @@
     var m = ui.querySelector('#pbg-music'); m.style.cssText = iconStyle(!!st.music); m.textContent = st.music ? '\u{1F3B5}' : '\u{1F515}';
   }
 
+  // Garante que a cena do jogo volte visivel e ativa (a cena SettingsGame e destruida,
+  // entao restaurar a visibilidade DELA nao adianta).
+  function restoreGame(fw) {
+    var gm = g(); if (!gm) return;
+    var targets = fw ? [fw] : [];
+    ['Game', 'LevelTutorial'].forEach(function (n) { if (targets.indexOf(n) < 0) targets.push(n); });
+    targets.forEach(function (n) {
+      try {
+        var sc = gm.scene.getScene(n);
+        if (!sc) return;
+        if (sc.sys && sc.sys.setVisible) sc.sys.setVisible(true);
+        gm.scene.resume(n);
+      } catch (e) {}
+    });
+  }
+
   function doContinue() {
-    try { var gm = g(), fw = fromWhere(); hidePhaser(false); gm.scene.stop('SettingsGame'); if (fw) gm.scene.resume(fw); }
+    try { var gm = g(), fw = fromWhere(); gm.scene.stop('SettingsGame'); restoreGame(fw); }
     catch (e) { console.warn('[PAUSE-BRIDGE] continuar', e); }
     hide();
   }
   function doRestart() {
     try {
-      var gm = g(), fw = fromWhere(); hidePhaser(false); gm.scene.stop('SettingsGame');
-      if (fw) { var lvl = gm.scene.getScene(fw); if (lvl && lvl.scene && lvl.scene.restart) lvl.scene.restart(); }
+      var gm = g(), fw = fromWhere(); gm.scene.stop('SettingsGame');
+      if (fw) { var lvl = gm.scene.getScene(fw); if (lvl && lvl.scene && lvl.scene.restart) { if (lvl.sys && lvl.sys.setVisible) lvl.sys.setVisible(true); lvl.scene.restart(); } }
+      else restoreGame(null);
     } catch (e) { console.warn('[PAUSE-BRIDGE] reiniciar', e); }
     hide();
   }
@@ -107,32 +124,23 @@
   }
 
 
-  /* O jogo AUTO-PAUSA no visibilitychange/blur (Phaser: pauseOnBlur + listener proprio).
-     Quando o rewarded ad abre, isso dispara e a cena SettingsGame sobe sozinha -> o overlay
-     de Pause "aparecia do nada" ao voltar do ad (relato do testador).
-     Regra: so mostramos o overlay quando o JOGADOR toca no botao de pause. */
-  var userOpened = false;      // clique real no botao de pause
-  function markUserOpen() { userOpened = true; }
-
-  // hook no botao de pause da cena de jogo
-  (function hookPauseButton() {
-    var iv = setInterval(function () {
-      var gm = g(); if (!gm || !gm.scene) return;
-      var sc = null;
-      try { sc = gm.scene.getScene('Game'); } catch (e) {}
-      if (!sc || !sc.pauseButton || sc.__pbHooked) return;
-      clearInterval(iv);
-      sc.__pbHooked = 1;
-      try {
-        var btn = sc.pauseButton;
-        var target = btn.container || btn;
-        if (target && typeof target.on === 'function') target.on('pointerdown', markUserOpen);
-        if (btn && typeof btn.on === 'function') btn.on('pointerdown', markUserOpen);
-      } catch (e) {}
-      console.log('[PAUSE-BRIDGE] botao de pause hookado (abre so no clique)');
-    }, 40);
-    setTimeout(function () { clearInterval(iv); }, 20000);
-  })();
+  /* O jogo AUTO-PAUSA quando a pagina vai a background (visibilitychange/blur) e quando o
+     rewarded ad abre. Nesses casos a cena SettingsGame sobe sozinha e o overlay de Pause
+     "aparecia do nada" ao voltar (relato do testador).
+     Deteccao correta: e pause automatico se a pagina NAO estava visivel quando ele ocorreu,
+     ou se um ad esta rodando. Um clique do jogador acontece com a pagina visivel.
+     (A versao anterior exigia "prova de clique" via hook no botao; quando o hook nao
+     encontrava o botao, TODO pause era tratado como automatico -> tela travada.) */
+  var hiddenAt = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') hiddenAt = Date.now();
+  });
+  function isAutoPause() {
+    if (window.__adRunning) return true;                 // ad em andamento
+    if (document.visibilityState === 'hidden') return true;
+    if (hiddenAt && (Date.now() - hiddenAt) < 1200) return true;  // acabou de voltar
+    return false;
+  }
 
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
@@ -140,12 +148,20 @@
     var active = false;
     try { active = gm.scene.isActive('SettingsGame'); } catch (e) {}
     if (active && !shown) {
-      if (window.__adRunning) { /* pause causado pelo ad: ignora */ }
-      else if (userOpened || window.__pauseUserClick) { userOpened = false; window.__pauseUserClick = false; show(); }
-      else {
-        // pause automatico (ad / app em background): nao mostramos o overlay e retomamos
+      if (isAutoPause()) {
+        // pause automatico (ad / app em background): fecha a cena e retoma, sem overlay
         try { gm.scene.stop('SettingsGame'); } catch (e) {}
-        try { var gs = gm.scene.getScene('Game'); if (gs && gs.scene && gs.scene.resume) gs.scene.resume(); } catch (e) {}
+        ['Game', 'LevelTutorial'].forEach(function (n) {
+          try {
+            if (gm.scene.getScene(n)) {
+              var s2 = gm.scene.getScene(n);
+              if (s2.sys && s2.sys.setVisible) s2.sys.setVisible(true);
+              gm.scene.resume(n);
+            }
+          } catch (e) {}
+        });
+      } else {
+        show();                       // clique do jogador: comportamento normal
       }
     }
     else if (!active && shown) hide();
