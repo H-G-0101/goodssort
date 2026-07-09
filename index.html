@@ -32,86 +32,88 @@
 
   <script src="https://app.cidi.games/sdk/cidi-sdk.js?v=20260427-expose-init-await-pi-init-1"></script>
   <script>
-  /* Dispara CiDiSDK.init() imediatamente, ANTES do game.
-     No Pi Browser/iOS o localStorage so funciona depois que o init resolve;
-     como os assets sao pesados (Phaser+atlas ~8MB), o init resolve a tempo do 1o save.
-     Expoe window.__cidiReady (Promise) p/ o cidi-storage-bridge fazer a re-leitura de seguranca.
-     Se o SDK nao carregar (offline/estudo), segue normal sem travar o jogo. */
-  window.__cidiReady = new Promise(function (resolve) {
-    var settled = false, done = function (ok) { if (!settled) { settled = true; window.__cidiInitState = ok ? 'ok' : 'failed'; resolve(ok); } };
-    window.__cidiInitState = 'pending';
+  /* Padrao do 2248 Nexum (que funciona no Pi Browser):
+       1) dispara CiDiSDK.init() e ESPERA (await) -> storage do Pi fica disponivel
+       2) RE-LE o save persistido e reaplica no jogo + atualiza a UI
+     O jogo carrega normal (defer) e le o localStorage cedo (pode vir vazio);
+     a re-leitura pos-init recupera o estado. Sem mirror, sem hook, sem guardiao. */
+  window.__cidiReady = (async function () {
+    var ok = false;
     try {
       if (window.CiDiSDK && typeof CiDiSDK.init === 'function') {
-        console.log('[CiDi-Storage] init() chamado (ANTES do game)');
-        CiDiSDK.init()
-          .then(function () { console.log('[CiDi-Storage] init() OK (storage pronto)'); done(true); })
-          .catch(function (e) { console.warn('[CiDi-Storage] init() FAILED', e); done(false); });
+        await CiDiSDK.init();
+        ok = true;
+        console.log('[CiDi-Storage] init() OK - storage pronto');
       } else {
-        console.warn('[CiDi-Storage] CiDiSDK ABSENT (offline/dev)');
-        done(false);
+        console.warn('[CiDi-Storage] CiDiSDK ausente (dev/offline)');
       }
-    } catch (e) { console.warn('[CiDi-Storage] init error', e); done(false); }
-    setTimeout(function () { if (!settled) { console.warn('[CiDi-Storage] init TIMEOUT 8s -> fallback (storage may be ephemeral!)'); done(false); } }, 8000);
-  });
+    } catch (e) { console.warn('[CiDi-Storage] init falhou:', e && (e.message || e.code)); }
+    try { reloadPersistedState(); } catch (e) { console.warn('[CiDi-Storage] reload falhou', e); }
+    return ok;
+  })();
+
+  /* Re-le o save apos o storage ficar disponivel (Pi iOS/Browser).
+     Espera o jogo existir, reaplica game.data e refresca as cenas ativas. */
+  function reloadPersistedState() {
+    var SAVE_KEY = 'grocery-store_sgk';
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      var gm = window.__game;
+      if (!gm || !gm.data || !gm.data.stats) { if (tries > 300) clearInterval(iv); return; }
+      clearInterval(iv);
+      try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) { console.log('[CiDi-Storage] sem save persistido (1a vez)'); return; }
+        var saved = JSON.parse(raw);
+        if (!saved || !saved.stats) return;
+        var bootedFresh = gm.data.stats.firstLoad === true;
+        var savedReal = saved.stats.firstLoad === false;
+        console.log('[CiDi-Storage] disk lvl' + saved.stats.currentCommonLevel + ' | game lvl' + gm.data.stats.currentCommonLevel);
+        if (bootedFresh && savedReal) {
+          gm.data = saved;                        // adota o estado persistido
+          console.log('[CiDi-Storage] estado recuperado pos-init');
+          try {
+            gm.scene.scenes.forEach(function (sc) {
+              if (sc.sys && sc.sys.isActive && sc.sys.isActive()) {
+                if (typeof sc.updateInfo === 'function') sc.updateInfo();
+                if (sc.LevelManager && typeof sc.LevelManager.updateBoosters === 'function') sc.LevelManager.updateBoosters();
+              }
+            });
+          } catch (e) {}
+        }
+      } catch (e) { console.warn('[CiDi-Storage] reload erro', e); }
+    }, 50);
+  }
   </script>
 
-  <script src="sdk-stub.js?v=161"></script>
+  <script src="sdk-stub.js?v=162"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=161" defer="defer"></script>
-  <script src="shop-bridge.js?v=161" defer="defer"></script>
-  <script src="pause-bridge.js?v=161" defer="defer"></script>
-  <script src="settings-bridge.js?v=161" defer="defer"></script>
-  <script src="levelend-bridge.js?v=161" defer="defer"></script>
-  <script src="menu-bridge.js?v=161" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=161" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=161" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=161" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=161" defer="defer"></script>
-  <script src="ranking-bridge.js?v=161" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=161" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=162" defer="defer"></script>
+  <script src="shop-bridge.js?v=162" defer="defer"></script>
+  <script src="pause-bridge.js?v=162" defer="defer"></script>
+  <script src="settings-bridge.js?v=162" defer="defer"></script>
+  <script src="levelend-bridge.js?v=162" defer="defer"></script>
+  <script src="menu-bridge.js?v=162" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=162" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=162" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=162" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=162" defer="defer"></script>
+  <script src="ranking-bridge.js?v=162" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=162" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=161" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=161" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=161" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=161" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=161" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=161" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=162" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=162" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=162" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=162" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=162" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=162" defer="defer"></script>
   <!-- persistencia: NENHUMA camada nossa. O jogo salva/carrega sozinho no localStorage,
        e CiDiSDK.init() (acima, antes do game) torna isso persistente no Pi Browser.
        Padrao identico ao 2248 e demais single-file que funcionam. -->
-
-  <!-- O GAME e carregado por JS, SO DEPOIS que CiDiSDK.init() resolver.
-       Motivo: init() e assincrono; com defer o jogo lia/gravava o localStorage ANTES do
-       storage do Pi Browser estar habilitado -> nada persistia. Padrao do nuts-and-bolts. -->
-  <script>
-  (function () {
-    function loadGame() {
-      if (window.__gameLoaded) return; window.__gameLoaded = 1;
-      var s = document.createElement('script');
-      s.src = 'game/grocery-store.min.js?v=161';
-      s.async = false;
-      document.body.appendChild(s);
-      console.log('[CiDi-Storage] game carregado apos init()');
-    }
-    // espera o init (Promise exposta acima). Fallback 8s pra nunca travar o jogo.
-    var done = false;
-    function go(tag) { if (done) return; done = true; console.log('[CiDi-Storage] boot do game (' + tag + ')'); loadGame(); }
-    // precisa de DUAS coisas: init resolvido E Phaser carregado (phaser.min.js tem defer)
-    function whenPhaser(cb) {
-      if (window.Phaser) return cb();
-      var iv = setInterval(function () { if (window.Phaser) { clearInterval(iv); cb(); } }, 30);
-      setTimeout(function () { clearInterval(iv); cb(); }, 15000);
-    }
-    try {
-      (window.__cidiReady || Promise.resolve(false)).then(function (ok) {
-        whenPhaser(function () { go('init=' + ok); });
-      });
-    } catch (e) { whenPhaser(function () { go('erro'); }); }
-    setTimeout(function () { whenPhaser(function () { go('timeout8s'); }); }, 8000);
-  })();
-  </script>
+  <script defer="defer" src="game/grocery-store.min.js?v=162"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -120,7 +122,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=161" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=162" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>
