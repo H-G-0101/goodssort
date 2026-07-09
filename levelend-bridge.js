@@ -22,6 +22,24 @@
   function rewardAmount() { var sc = scene(); return (sc && typeof sc.rewardAmount === 'number') ? sc.rewardAmount : 0; }
   // base do bonus da roleta em MOEDAS (nativo era 100 fixo; agora 40 fixo - edite a vontade)
   var BONUS_BASE = 40;
+
+  /* O botao "continue" NAO deve dar moedas: o premio nativo do jogo (GlobalVariables
+     .plusWinReward, creditado pela cena de vitoria) e zerado aqui. O premio fica so na
+     roleta do ad (ao lado), que usa BONUS_BASE * multiplicador. */
+  (function killNativeWinReward() {
+    var iv = setInterval(function () {
+      var gm = window.__game;
+      if (!gm || !gm.GlobalVariables) return;
+      clearInterval(iv);
+      try {
+        if (gm.GlobalVariables.plusWinReward !== 0) {
+          console.log('[LEVELEND-BRIDGE] plusWinReward ' + gm.GlobalVariables.plusWinReward + ' -> 0 (continue nao premia)');
+          gm.GlobalVariables.plusWinReward = 0;
+        }
+      } catch (e) {}
+    }, 30);
+    setTimeout(function () { clearInterval(iv); }, 20000);
+  })();
   function bonusBase() { return BONUS_BASE; }
   function rewardSeconds() { return ADD_SECONDS; }
   function mode() { var lc = levelConfig(); return (lc && lc.mode) ? lc.mode : 'Level'; }
