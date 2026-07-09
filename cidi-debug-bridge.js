@@ -47,7 +47,7 @@
     statusEl.innerHTML =
       row(!!window.__BUILD__, 'BUILD', window.__BUILD__ || 'OLD/unknown') +
       row(hasSDK, 'CiDiSDK loaded', hasSDK ? 'yes' : 'NO') +
-      row(window.__cidiInitState === 'ok' ? true : window.__cidiInitState === 'failed' ? false : null, 'CiDi init()', window.__cidiInitState || 'pending') +
+      row(window.__cidiInitState === 'ok' ? true : (window.__cidiInitState === 'pending' || !window.__cidiInitState) ? null : false, 'CiDi init()', window.__cidiInitState || 'pending') +
       row(wr, 'localStorage write/read', wr ? 'OK' : 'FAILED') +
       row(!!probe, 'persist probe', probe ? 'survived' : 'none') +
       row(!!disk, 'disk save exists', disk ? 'yes' : 'no') +
