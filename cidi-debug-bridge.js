@@ -96,6 +96,29 @@
       var txt = lines.slice().reverse().map(function (l) { return '[' + l.t + '] ' + l.m; }).join('\n');
       try { navigator.clipboard.writeText(txt); push('info', 'log copied'); } catch (e) {}
     };
+    // TESTE DIRETO DE PERSISTENCIA na chave do save
+    var tb = document.createElement('button');
+    tb.textContent = 'test save';
+    tb.style.cssText = 'margin-right:6px;border:1px solid #7ee2a8;background:none;color:#7ee2a8;border-radius:6px;padding:3px 8px;font-family:inherit;cursor:pointer;';
+    panel.querySelector('#cd-adtest').parentNode.insertBefore(tb, panel.querySelector('#cd-adtest'));
+    tb.onclick = function () {
+      try {
+        var probe = { stats: { currentCommonLevel: 99, coins: 12345, firstLoad: false } };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(probe));
+        push('evt', 'wrote lvl99 c12345 to ' + SAVE_KEY);
+        function chk(ms) {
+          setTimeout(function () {
+            try {
+              var r = localStorage.getItem(SAVE_KEY);
+              var lv = r ? (JSON.parse(r).stats || {}).currentCommonLevel : null;
+              push(lv === 99 ? 'ok' : 'bad', '+' + ms + 'ms read -> lvl' + lv);
+            } catch (e) { push('bad', '+' + ms + 'ms read error'); }
+          }, ms);
+        }
+        chk(0); chk(1000); chk(3000);
+        push('info', 'agora FECHE e reabra: se voltar lvl99, o storage persiste');
+      } catch (e) { push('bad', 'test save error: ' + (e && e.message)); }
+    };
     panel.querySelector('#cd-adtest').onclick = function () {
       // Chama o rewarded do CiDi DIRETO p/ capturar o codigo de erro exato (doc: AD_NOT_CERTIFIED,
       // AD_NOT_AVAILABLE, PI_ADS_NOT_AVAILABLE, USER_UNAUTHENTICATED, TIMEOUT, etc).
