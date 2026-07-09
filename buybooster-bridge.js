@@ -31,6 +31,8 @@
   function info() { var sc = scene(); return (sc && sc.whatToBuy) ? sc.whatToBuy : null; }
   function itemType() { var w = info(); return w ? w.item : null; }
   function caller() { var w = info(); return w ? w.fromWhere : null; }
+  // esconde/mostra a cena do MODAL nativo (BuyBooster). NAO tocar nas cenas de jogo aqui:
+  // quem restaura o jogo e o close(), pois a cena BuyBooster e destruida.
   function hidePhaser(h) { try { var sc = scene(); if (sc && sc.sys && sc.sys.setVisible) sc.sys.setVisible(!h); } catch (e) {} }
   function playSnd(name) { try { var gm = g(); if (gm && gm.data.stats.audio && gm.sounds && gm.sounds[name]) gm.sounds[name].play(); } catch (e) {} }
 
@@ -132,17 +134,35 @@
   }
 
   // fechar (botao X): resume o caller e aplica os boosters comprados a sessao
+  // BUGFIX: hidePhaser() agia sobre a cena 'BuyBooster' (que e destruida logo em seguida),
+  // entao a cena do JOGO ficava invisivel/pausada -> tela travada ao fechar o modal.
+  // Agora restauramos a visibilidade da cena CHAMADORA (Game/LevelTutorial).
   function close() {
+    var ck = null;
+    try { ck = caller(); } catch (e) {}
     try {
-      var gm = g(), ck = caller();
-      hidePhaser(false);
-      gm.scene.stop('BuyBooster');
-      if (ck) {
-        try { gm.scene.resume(ck); } catch (e) {}
-        var cs = gm.scene.getScene(ck);
-        try { if (cs && cs.LevelManager && typeof cs.LevelManager.updateBoosters === 'function') cs.LevelManager.updateBoosters(); } catch (e) {}
-        try { if (cs && typeof cs.updateInfo === 'function') cs.updateInfo(); } catch (e) {}
-      }
+      var gm = g();
+      try { gm.scene.stop('BuyBooster'); } catch (e) {}
+      var target = ck || 'Game';
+      try {
+        var cs = gm.scene.getScene(target);
+        if (cs && cs.sys) {
+          if (cs.sys.setVisible) cs.sys.setVisible(true);       // volta a aparecer
+          if (!gm.scene.isActive(target)) { try { gm.scene.resume(target); } catch (e) {} }
+        }
+        try { gm.scene.resume(target); } catch (e) {}
+        if (cs && cs.LevelManager && typeof cs.LevelManager.updateBoosters === 'function') cs.LevelManager.updateBoosters();
+        if (cs && typeof cs.updateInfo === 'function') cs.updateInfo();
+      } catch (e) {}
+      // rede de seguranca: garante que nenhuma cena de jogo fique invisivel
+      try {
+        ['Game', 'LevelTutorial'].forEach(function (n) {
+          if (gm.scene.isActive(n)) {
+            var s2 = gm.scene.getScene(n);
+            if (s2 && s2.sys && s2.sys.setVisible) s2.sys.setVisible(true);
+          }
+        });
+      } catch (e) {}
     } catch (e) { console.warn('[BUYBOOSTER-BRIDGE] close', e); }
     hide();
   }
