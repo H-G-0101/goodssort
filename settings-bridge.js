@@ -60,7 +60,10 @@
     root.querySelector('#sbg-music').onclick = function () { var st = stats(); if (!st) return; st.music = !st.music; applyMusic(st.music); save(); render(); };
     root.querySelector('#sbg-del').onclick = function () {
       if (!window.confirm('Apagar todo o progresso? Isso nao pode ser desfeito.')) return;
-      window.__resetting = 1;                       // impede o auto-save de regravar
+      // __hardReset (index.html): trava saves, mata o auto-save, apaga as chaves e recarrega.
+      if (typeof window.__hardReset === 'function') { window.__hardReset(); return; }
+      // fallback (dev/local)
+      window.__resetting = 1;
       try { localStorage.removeItem('grocery-store_sgk'); } catch (e) {}
       try { localStorage.removeItem('grocery-store_cidi'); } catch (e) {}
       setTimeout(function () { location.reload(); }, 60);
