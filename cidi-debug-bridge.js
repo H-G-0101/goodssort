@@ -54,6 +54,8 @@
       row(disk ? null : false, 'DISK  lvl / coins', disk && disk.stats ? ('lvl ' + disk.stats.currentCommonLevel + ' \u00b7 ' + disk.stats.coins + 'c') : '-') +
       row(s ? null : false, 'GAME  lvl / coins', s ? ('lvl ' + s.currentCommonLevel + ' \u00b7 ' + s.coins + 'c') : '-') +
       row((window.__saves||0) > 0, 'saves feitos', String(window.__saves || 0)) +
+      row(window.__saveOk === 'MATCH', 'save verify', (window.__saveOk || '-') + (window.__saveBytes ? (' ' + window.__saveBytes + 'b') : '')) +
+      row(window.__saveErr ? false : null, 'save error', window.__saveErr || 'none') +
       row(null, 'CiDiSDK API', (function(){ try { return Object.keys(window.CiDiSDK||{}).join(',').slice(0,70) || 'none'; } catch(e){ return 'err'; } })()) +
       row(null, 'LS keys', (function(){ try { var a=[]; for (var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a.join(',').slice(0,60) || 'none'; } catch(e){ return 'err'; } })()) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
