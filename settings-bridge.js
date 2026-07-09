@@ -60,8 +60,10 @@
     root.querySelector('#sbg-music').onclick = function () { var st = stats(); if (!st) return; st.music = !st.music; applyMusic(st.music); save(); render(); };
     root.querySelector('#sbg-del').onclick = function () {
       if (!window.confirm('Apagar todo o progresso? Isso nao pode ser desfeito.')) return;
+      window.__resetting = 1;                       // impede o auto-save de regravar
       try { localStorage.removeItem('grocery-store_sgk'); } catch (e) {}
-      location.reload();
+      try { localStorage.removeItem('grocery-store_cidi'); } catch (e) {}
+      setTimeout(function () { location.reload(); }, 60);
     };
   }
 
@@ -149,7 +151,7 @@
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
     tryHook();
-    // mostra quando aberto pelo botao (Menu pausado) OU no primeiro acesso (firstLoad)
+    // mostra a nossa overlay quando aberto pelo botao (Menu pausado) OU no primeiro acesso (firstLoad)
     var ok = false;
     try { ok = gm.scene.isActive('Settings') && (gm.scene.isPaused('Menu') || isFirstRun()); } catch (e) {}
     if (ok && !shown) show('Settings');
