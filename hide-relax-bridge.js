@@ -25,9 +25,7 @@
         if (m.iconzzz && m.iconzzz.setVisible) m.iconzzz.setVisible(false);
         killBtn(m.leaderboardButton);                 // ranking (medalha) tambem no tutorial
         if (m.iconLeaderboard && m.iconLeaderboard.setVisible) m.iconLeaderboard.setVisible(false);
-        // mao do tutorial apontando p/ o shop (hand / handTween)
-        if (m.hand && m.hand.setVisible) m.hand.setVisible(false);
-        if (m.handTween && m.handTween.stop) { try { m.handTween.stop(); } catch (e) {} }
+
       } catch (e) {}
     });
   }, 60);
