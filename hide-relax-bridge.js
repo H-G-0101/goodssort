@@ -35,8 +35,58 @@
         var o = m[k];
         if (Array.isArray(o)) o.forEach(killObj); else killObj(o);
       });
+      // remove mascaras aplicadas na camera (o escurecimento vem daqui)
+      try { if (m.cameras && m.cameras.main && m.cameras.main.mask) m.cameras.main.clearMask(true); } catch (e) {}
+      // varre a display list por retangulos/imagens de overlay que sobrarem
+      try {
+        (m.children && m.children.list ? m.children.list : []).forEach(function (o) {
+          if (!o) return;
+          var t = o.type || '';
+          var big = (o.width && o.width > 600) || (o.displayWidth && o.displayWidth > 600);
+          if ((t === 'Rectangle' || t === 'Graphics') && big) { o.visible = false; }
+          if (o.mask) { try { o.clearMask(true); } catch (e) {} }
+        });
+      } catch (e) {}
     } catch (e) {}
   }
+
+  /* O bundle inicia a cena MenuTutorial sozinho (tutorial da home: tela escura + quadrado de
+     luz + mao apontando o shop). E redundante e desalinha com nosso layout. Interceptamos o
+     ScenePlugin.start: qualquer pedido de 'MenuTutorial' vira 'Menu'. Se ela ja estiver
+     ativa (corrida no boot), paramos a cena e iniciamos a Menu. */
+  (function killMenuTutorial() {
+    var iv = setInterval(function () {
+      var gm = window.__game;
+      if (!gm || !gm.scene || !gm.scene.scenes || !gm.scene.scenes.length) return;
+      clearInterval(iv);
+
+      // 1) patch do ScenePlugin.start em todas as cenas (o plugin e compartilhado por prototipo)
+      try {
+        var anySc = gm.scene.scenes[0];
+        var proto = anySc && anySc.scene && Object.getPrototypeOf(anySc.scene);
+        if (proto && typeof proto.start === 'function' && !proto.__mtPatched) {
+          proto.__mtPatched = 1;
+          var origStart = proto.start;
+          proto.start = function (key, data) {
+            if (key === 'MenuTutorial') { key = 'Menu'; }
+            return origStart.call(this, key, data);
+          };
+          console.log('[HIDE-RELAX] MenuTutorial redirecionado p/ Menu');
+        }
+      } catch (e) {}
+
+      // 2) se ja estiver rodando, derruba e abre a home
+      try {
+        if (gm.scene.isActive('MenuTutorial')) {
+          gm.scene.stop('MenuTutorial');
+          if (!gm.scene.isActive('Menu')) gm.scene.start('Menu');
+          console.log('[HIDE-RELAX] MenuTutorial ativo -> trocado por Menu');
+        }
+      } catch (e) {}
+    }, 20);
+    setTimeout(function () { clearInterval(iv); }, 20000);
+  })();
+
   function killBtn(b) {
     if (!b) return;
     if (b.container) { b.container.visible = false; if (b.container.setActive) b.container.setActive(false); }
