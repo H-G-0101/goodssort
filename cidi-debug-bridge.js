@@ -10,7 +10,13 @@
 
   function g() { return window.__game; }
   function stats() { try { return g().data.stats; } catch (e) { return null; } }
-  function readSaved() { try { var r = window.localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function readSaved() {
+    try {
+      // tenta pelo storage que o JOGO usa: se o Phaser expoe, usa o mesmo objeto global do bundle
+      var r = window.localStorage.getItem(SAVE_KEY);
+      return r ? JSON.parse(r) : null;
+    } catch (e) { return null; }
+  }
   function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; }); }
   function safe(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return '' + v; } }
 
@@ -47,11 +53,6 @@
       row(!!disk, 'disk save exists', disk ? 'yes' : 'no') +
       row(disk ? null : false, 'DISK  lvl / coins', disk && disk.stats ? ('lvl ' + disk.stats.currentCommonLevel + ' \u00b7 ' + disk.stats.coins + 'c') : '-') +
       row(s ? null : false, 'GAME  lvl / coins', s ? ('lvl ' + s.currentCommonLevel + ' \u00b7 ' + s.coins + 'c') : '-') +
-      row(m.ticks > 0, 'mirror ticks/writes', (m.ticks || 0) + ' / ' + (m.writes || 0)) +
-      row(m.err ? false : null, 'mirror last', m.err ? ('ERR ' + m.err) : (m.last || '-')) +
-      row(m.readback && m.readback.indexOf('MATCH')===0, 'mirror readback', m.readback || '-') +
-      row((window.__mirror||{}).sameGame === 'same', '__game === scene.game', (window.__mirror||{}).sameGame || '-') +
-      row(null, 'BOOT disk/game', (window.__boot || '-')) +
       row(null, 'CiDiSDK API', (function(){ try { return Object.keys(window.CiDiSDK||{}).join(',').slice(0,70) || 'none'; } catch(e){ return 'err'; } })()) +
       row(null, 'LS keys', (function(){ try { var a=[]; for (var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a.join(',').slice(0,60) || 'none'; } catch(e){ return 'err'; } })()) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
