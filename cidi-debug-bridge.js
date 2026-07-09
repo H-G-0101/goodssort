@@ -56,17 +56,6 @@
       row((window.__saves||0) > 0, 'saves feitos', String(window.__saves || 0)) +
       row(window.__saveOk === 'MATCH', 'save verify', (window.__saveOk || '-') + (window.__saveBytes ? (' ' + window.__saveBytes + 'b') : '')) +
       row(window.__saveErr ? false : null, 'save error', window.__saveErr || 'none') +
-      row(null, 'MenuTutorial keys', (function () {
-        try {
-          var gm = window.__game;
-          if (!gm || !gm.scene.isActive('MenuTutorial')) return 'cena inativa';
-          var sc = gm.scene.getScene('MenuTutorial');
-          var ks = Object.keys(sc).filter(function (k) {
-            return /hand|hint|rect|light|mask|spot|tutor/i.test(k);
-          });
-          return ks.join(',') || 'nenhuma';
-        } catch (e) { return 'err'; }
-      })()) +
       row(null, 'CiDiSDK API', (function(){ try { return Object.keys(window.CiDiSDK||{}).join(',').slice(0,70) || 'none'; } catch(e){ return 'err'; } })()) +
       row(null, 'LS keys', (function(){ try { var a=[]; for (var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a.join(',').slice(0,60) || 'none'; } catch(e){ return 'err'; } })()) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +

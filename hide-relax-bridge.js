@@ -12,6 +12,31 @@
     try { SCENES.forEach(function (n) { if (g().scene.isActive(n)) out.push(g().scene.getScene(n)); }); } catch (e) {}
     return out;
   }
+
+  /* O tutorial da HOME (seta/mao + quadrado de luz + tela escura apontando p/ o shop) e
+     redundante: o jogador acha o carrinho sozinho. Escondemos todo o overlay.
+     Varremos as props da cena por nome (hand/hint/rect/light/mask/spot/tutor) para nao
+     depender de um nome exato do bundle ofuscado. */
+  var TUT_RE = /^(hand|handTween|hintRectangle|hintArray|lightScreen|screenMask|spotlight|tutorialRect|maskRect)$/i;
+  function killObj(o) {
+    if (!o) return;
+    try {
+      if (typeof o.stop === 'function') o.stop();                 // tweens
+      if (typeof o.setVisible === 'function') o.setVisible(false);
+      else if ('visible' in o) o.visible = false;
+      if (typeof o.setActive === 'function') o.setActive(false);
+      if (o.container && 'visible' in o.container) o.container.visible = false;
+    } catch (e) {}
+  }
+  function hideHomeTutorial(m) {
+    try {
+      Object.keys(m).forEach(function (k) {
+        if (!TUT_RE.test(k)) return;
+        var o = m[k];
+        if (Array.isArray(o)) o.forEach(killObj); else killObj(o);
+      });
+    } catch (e) {}
+  }
   function killBtn(b) {
     if (!b) return;
     if (b.container) { b.container.visible = false; if (b.container.setActive) b.container.setActive(false); }
@@ -25,6 +50,7 @@
         if (m.iconzzz && m.iconzzz.setVisible) m.iconzzz.setVisible(false);
         killBtn(m.leaderboardButton);                 // ranking (medalha) tambem no tutorial
         if (m.iconLeaderboard && m.iconLeaderboard.setVisible) m.iconLeaderboard.setVisible(false);
+        hideHomeTutorial(m);                          // overlay do tutorial da home (redundante)
 
       } catch (e) {}
     });

@@ -19,33 +19,12 @@
     if (b.container) { b.container.visible = false; }
     b.canBePressed = false;
   }
-  // Alinha os elementos do tutorial (spotlight/mascara/mao) ao shop, que nos movemos.
-  // Sem isso o quadrado de luz fica na posicao ORIGINAL do botao.
-  function alignTutorialToShop(m) {
-    try {
-      var sc = m.shopButton && m.shopButton.container;
-      if (!sc) return;
-      var x = sc.x, y = sc.y;
-      ['hintRectangle', 'spotlight', 'tutorialRect', 'maskRect'].forEach(function (k) {
-        var o = m[k];
-        if (o && typeof o.setPosition === 'function') o.setPosition(x, y);
-        else if (o && 'x' in o) { o.x = x; o.y = y; }
-      });
-      // a mao fica logo abaixo/direita do icone, como no original
-      if (m.hand) {
-        if (typeof m.hand.setPosition === 'function') m.hand.setPosition(x + 18, y + 34);
-        else { m.hand.x = x + 18; m.hand.y = y + 34; }
-      }
-    } catch (e) {}
-  }
-
   setInterval(function () {
     menus().forEach(function (m) {
     try {
       hideBtn(m.leaderboardButton);                 // esconde ranking (medalha)
       if (m.dailyButton && m.dailyButton.container) m.dailyButton.container.x = -SPACING;
       if (m.shopButton  && m.shopButton.container)  m.shopButton.container.x  =  SPACING;
-      alignTutorialToShop(m);                       // spotlight + mao seguem o shop
     } catch (e) {}
     });
   }, 60);

@@ -151,7 +151,9 @@
       if (st) { if (m === 'LevelRelax') st.currentRelaxLevel = ln + 1; else st.currentCommonLevel = ln + 1; save(); }
       hidePhaser(false);
       var sp = sc && sc.scene;
-      if (sp && sp.start) { if (st && st.currentCommonLevel < 2) sp.start('MenuTutorial'); else sp.start(m); }
+      // Nao usamos MenuTutorial: o tutorial da home (mao + quadrado de luz sobre o shop) e
+      // redundante e desalinhado (movemos os botoes). Vamos sempre para a home normal.
+      if (sp && sp.start) sp.start(m);
     } catch (e) { console.warn('[LEVELEND-BRIDGE] continue', e); }
     hide();
   }
