@@ -106,12 +106,48 @@
     } catch (e) {}
   }
 
+
+  /* O jogo AUTO-PAUSA no visibilitychange/blur (Phaser: pauseOnBlur + listener proprio).
+     Quando o rewarded ad abre, isso dispara e a cena SettingsGame sobe sozinha -> o overlay
+     de Pause "aparecia do nada" ao voltar do ad (relato do testador).
+     Regra: so mostramos o overlay quando o JOGADOR toca no botao de pause. */
+  var userOpened = false;      // clique real no botao de pause
+  function markUserOpen() { userOpened = true; }
+
+  // hook no botao de pause da cena de jogo
+  (function hookPauseButton() {
+    var iv = setInterval(function () {
+      var gm = g(); if (!gm || !gm.scene) return;
+      var sc = null;
+      try { sc = gm.scene.getScene('Game'); } catch (e) {}
+      if (!sc || !sc.pauseButton || sc.__pbHooked) return;
+      clearInterval(iv);
+      sc.__pbHooked = 1;
+      try {
+        var btn = sc.pauseButton;
+        var target = btn.container || btn;
+        if (target && typeof target.on === 'function') target.on('pointerdown', markUserOpen);
+        if (btn && typeof btn.on === 'function') btn.on('pointerdown', markUserOpen);
+      } catch (e) {}
+      console.log('[PAUSE-BRIDGE] botao de pause hookado (abre so no clique)');
+    }, 40);
+    setTimeout(function () { clearInterval(iv); }, 20000);
+  })();
+
   setInterval(function () {
     var gm = g(); if (!gm || !gm.scene) return;
     tryHook();
     var active = false;
     try { active = gm.scene.isActive('SettingsGame'); } catch (e) {}
-    if (active && !shown) show();
+    if (active && !shown) {
+      if (window.__adRunning) { /* pause causado pelo ad: ignora */ }
+      else if (userOpened || window.__pauseUserClick) { userOpened = false; window.__pauseUserClick = false; show(); }
+      else {
+        // pause automatico (ad / app em background): nao mostramos o overlay e retomamos
+        try { gm.scene.stop('SettingsGame'); } catch (e) {}
+        try { var gs = gm.scene.getScene('Game'); if (gs && gs.scene && gs.scene.resume) gs.scene.resume(); } catch (e) {}
+      }
+    }
     else if (!active && shown) hide();
   }, 30);
 

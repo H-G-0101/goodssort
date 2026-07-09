@@ -65,19 +65,33 @@
   // O jogo chama _azerionIntegrationSDK.showRewardedAd() (IS_PRODUCTION=true no bundle),
   // e trata o retorno como boolean (ok ? concede : nada). Roteamos pro CiDi.
   // Doc CiDi: showRewardedAd({timeout}) -> Promise<{success}>; SO success===true concede.
+  /* Enquanto o ad estiver aberto, o app vai p/ background e o jogo AUTO-PAUSA
+     (visibilitychange). Sinalizamos p/ o pause-bridge ignorar esse pause e nao mostrar
+     o overlay ao voltar. */
+  function adWindow(on) {
+    window.__adRunning = !!on;
+    try {
+      var gm = window.__game;
+      if (gm && gm.sound) gm.sound.pauseOnBlur = !on;   // evita o pause automatico do Phaser
+    } catch (e) {}
+  }
+
   function cidiRewarded() {
     return new Promise(function (resolve) {
       try {
         if (window.CiDiSDK && typeof CiDiSDK.showRewardedAd === 'function') {
           adOverlay(true);
+          adWindow(true);
           CiDiSDK.showRewardedAd({ timeout: 300000 })
             .then(function (r) {
+              adWindow(false);
               adOverlay(false);
               var ok = !!(r && r.success === true);
               console.log('[CiDi-Ad] showRewardedAd ->', ok, r);
               resolve(ok);
             })
             .catch(function (err) {
+              adWindow(false);
               adOverlay(false);
               console.warn('[CiDi-Ad] showRewardedAd FAILED -> error=' + (err && (err.error || err.code)) + ' msg=' + (err && err.message));
               resolve(false);
