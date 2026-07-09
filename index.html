@@ -45,7 +45,7 @@
     });
   })();
   </script>
-  <script>window.__BUILD__='v102';console.log('[CiDi-Persist] BUILD v102 loaded');</script>
+  <script>window.__BUILD__='v103';console.log('[CiDi-Persist] BUILD v103 loaded');</script>
   <!-- spy de storage removido: embrulhar Storage.prototype divergia do localStorage real do CiDi -->
 
   <script src="https://app.cidi.games/sdk/cidi-sdk.js?v=20260427-expose-init-await-pi-init-1"></script>
@@ -73,29 +73,29 @@
   });
   </script>
 
-  <script src="sdk-stub.js?v=157"></script>
+  <script src="sdk-stub.js?v=158"></script>
   <script src="libs/phaser.min.js" defer="true"></script>
-  <script src="boot-counter-bridge.js?v=157" defer="defer"></script>
-  <script src="shop-bridge.js?v=157" defer="defer"></script>
-  <script src="pause-bridge.js?v=157" defer="defer"></script>
-  <script src="settings-bridge.js?v=157" defer="defer"></script>
-  <script src="levelend-bridge.js?v=157" defer="defer"></script>
-  <script src="menu-bridge.js?v=157" defer="defer"></script>
-  <script src="plus-coins-bridge.js?v=157" defer="defer"></script>
-  <script src="daily-reward-bridge.js?v=157" defer="defer"></script>
-  <script src="gameplay-score-bridge.js?v=157" defer="defer"></script>
-  <script src="combo-legend-bridge.js?v=157" defer="defer"></script>
-  <script src="ranking-bridge.js?v=157" defer="defer"></script>
-  <script src="buybooster-bridge.js?v=157" defer="defer"></script>
+  <script src="boot-counter-bridge.js?v=158" defer="defer"></script>
+  <script src="shop-bridge.js?v=158" defer="defer"></script>
+  <script src="pause-bridge.js?v=158" defer="defer"></script>
+  <script src="settings-bridge.js?v=158" defer="defer"></script>
+  <script src="levelend-bridge.js?v=158" defer="defer"></script>
+  <script src="menu-bridge.js?v=158" defer="defer"></script>
+  <script src="plus-coins-bridge.js?v=158" defer="defer"></script>
+  <script src="daily-reward-bridge.js?v=158" defer="defer"></script>
+  <script src="gameplay-score-bridge.js?v=158" defer="defer"></script>
+  <script src="combo-legend-bridge.js?v=158" defer="defer"></script>
+  <script src="ranking-bridge.js?v=158" defer="defer"></script>
+  <script src="buybooster-bridge.js?v=158" defer="defer"></script>
   <!-- storage-bridge agora é INLINE (abaixo), p/ nunca ficar dessincronizado com o index -->
   <!-- CiDi Login SDK: UMD do proxy (define CidiProxySDK) + bridge que cria o client e faz login() -->
   <script src="https://elf-resource.cidi.games/sdk/cidi-proxy-sdk.umd.js" defer="defer"></script>
-  <script src="cidi-login-bridge.js?v=157" defer="defer"></script>
-  <!-- <script src="cidi-console-bridge.js?v=157" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
-  <script src="cidi-report-bridge.js?v=157" defer="defer"></script>
-  <script src="cidi-debug-bridge.js?v=157" defer="defer"></script>
-  <script src="hide-relax-bridge.js?v=157" defer="defer"></script>
-  <script src="home-layout-bridge.js?v=157" defer="defer"></script>
+  <script src="cidi-login-bridge.js?v=158" defer="defer"></script>
+  <!-- <script src="cidi-console-bridge.js?v=158" defer="defer"></script>  fundido no cidi-debug-bridge (estilo Bus Jam) -->
+  <script src="cidi-report-bridge.js?v=158" defer="defer"></script>
+  <script src="cidi-debug-bridge.js?v=158" defer="defer"></script>
+  <script src="hide-relax-bridge.js?v=158" defer="defer"></script>
+  <script src="home-layout-bridge.js?v=158" defer="defer"></script>
   <!-- ===== PERSISTENCIA INLINE (CiDi Storage) - sempre junto do index, no-cache ===== -->
   <script>
 
@@ -141,13 +141,14 @@
     try { window.addEventListener(ev, function () { doSave(ev); }); } catch (e) {}
   });
   try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') doSave('hidden'); }); } catch (e) {}
-  // 2) quando o nivel AVANCA (momento significativo, poucas escritas)
+  // 2) SALVA PERIODICAMENTE (1s). No Pi Browser os eventos de fechar nem sempre disparam
+  //    (o app pode ser morto), entao nao da pra depender so do pagehide.
   try {
     setInterval(function () {
       var gm = realGame(); if (!gm || !gm.data || !gm.data.stats) return;
-      var lv = gm.data.stats.currentCommonLevel;
       window.__mirror = window.__mirror || {}; window.__mirror.ticks = (window.__mirror.ticks || 0) + 1;
-      if (lastLv !== null && lv !== lastLv) doSave('levelup');
+      var lv = gm.data.stats.currentCommonLevel;
+      doSave(lastLv !== null && lv !== lastLv ? 'levelup' : 'tick');
       lastLv = lv;
     }, 1000);
   } catch (e) {}
@@ -179,8 +180,10 @@
     try {
       var raw = window.localStorage.getItem(KEY);
       var disk = raw ? JSON.parse(raw) : null;
-      console.log('[CiDi-Persist] DISK on boot -> ' + (disk && disk.stats ? ('lvl ' + disk.stats.currentCommonLevel + ' coins ' + disk.stats.coins) : 'none'));
-      console.log('[CiDi-Persist] GAME on boot -> lvl ' + gm.data.stats.currentCommonLevel + ' coins ' + gm.data.stats.coins);
+      var dTxt = disk && disk.stats ? ('lvl' + disk.stats.currentCommonLevel + 'c' + disk.stats.coins) : 'none';
+      var gTxt = 'lvl' + gm.data.stats.currentCommonLevel + 'c' + gm.data.stats.coins;
+      window.__boot = 'disk ' + dTxt + ' | game ' + gTxt;
+      console.log('[CiDi-Persist] BOOT disk=' + dTxt + ' game=' + gTxt);
       var diskLv = disk && disk.stats ? (disk.stats.currentCommonLevel || 0) : 0;
       var gameLv = gm.data.stats.currentCommonLevel || 0;
       var diskC = disk && disk.stats ? (disk.stats.coins || 0) : 0;
@@ -206,7 +209,7 @@
 })();
 
   </script>
-  <script defer="defer" src="game/grocery-store.min.js?v=157"></script>
+  <script defer="defer" src="game/grocery-store.min.js?v=158"></script>
 </head>
 <body>
   <!-- header/menu do portal yahoo removido (iframe externo que nao carrega local) -->
@@ -215,7 +218,7 @@
        Some quando o canvas do Phaser aparece (a splash nativa assume). -->
   <div id="loader" style="display:flex;align-items:center;justify-content:center;
        background:linear-gradient(160deg,#ddd6f6,#cfc6ef);">
-    <img src="assets/splash-logo.png?v=157" alt="Grocery Store"
+    <img src="assets/splash-logo.png?v=158" alt="Grocery Store"
          style="width:72%;max-width:440px;height:auto;filter:drop-shadow(0 6px 18px rgba(60,40,110,0.25));">
   </div>
   <script>

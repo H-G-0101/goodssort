@@ -51,7 +51,7 @@
       row(m.err ? false : null, 'mirror last', m.err ? ('ERR ' + m.err) : (m.last || '-')) +
       row(m.readback && m.readback.indexOf('MATCH')===0, 'mirror readback', m.readback || '-') +
       row((window.__mirror||{}).sameGame === 'same', '__game === scene.game', (window.__mirror||{}).sameGame || '-') +
-      row(null, 'disk AFTER save', (window.__mirror||{}).afterSave || '-') +
+      row(null, 'BOOT disk/game', (window.__boot || '-')) +
       row(null, 'CiDiSDK API', (function(){ try { return Object.keys(window.CiDiSDK||{}).join(',').slice(0,70) || 'none'; } catch(e){ return 'err'; } })()) +
       row(null, 'LS keys', (function(){ try { var a=[]; for (var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a.join(',').slice(0,60) || 'none'; } catch(e){ return 'err'; } })()) +
       row(window.__cidiLoggedIn === true, 'login', window.__cidiLoggedIn === true ? 'SIM' : 'no') +
