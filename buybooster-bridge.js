@@ -37,12 +37,17 @@
   function playSnd(name) { try { var gm = g(); if (gm && gm.data.stats.audio && gm.sounds && gm.sounds[name]) gm.sounds[name].play(); } catch (e) {} }
 
   // moeda roxa (estilo do jogo)
+  // moeda roxa igual a do HUD do jogo: disco roxo + faisca dourada de 4 pontas (sem "$")
   function coinDot(size, font) {
+    var s = Math.round(size * 0.62);
+    var spark = '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" style="display:block;">' +
+      '<path d="M12 1.6 L13.9 8.1 L20.4 10 L13.9 11.9 L12 18.4 L10.1 11.9 L3.6 10 L10.1 8.1 Z" ' +
+      'fill="#ffd85e" stroke="#f2b23a" stroke-width="1" stroke-linejoin="round"/>' +
+      '</svg>';
     return '<span style="position:relative;width:' + size + 'px;height:' + size + 'px;border-radius:50%;' +
       'background:radial-gradient(circle at 36% 30%,#c9a6ff,#7b4fe0);border:2px solid #fff;' +
       'box-shadow:inset 0 -3px 4px rgba(50,15,110,0.45),inset 0 2px 2px rgba(255,255,255,0.5);' +
-      'display:flex;align-items:center;justify-content:center;flex:0 0 auto;">' +
-      '<span style="font-weight:800;font-size:' + font + 'px;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,0.3);">$</span></span>';
+      'display:flex;align-items:center;justify-content:center;flex:0 0 auto;">' + spark + '</span>';
   }
 
   function build() {
