@@ -58,7 +58,7 @@
       var gm = g(), sc = scene(), m = mode();
       hidePhaser(false);
       try { gm.scene.stop('LevelEnd'); } catch (e) {}
-      var lvl = gm.scene.getScene(m); if (lvl && lvl.scene && lvl.scene.restart) lvl.scene.restart();
+      var lvl = gm.scene.getScene(m); if (lvl && lvl.scene && lvl.scene.restart) { if (lvl.sys && lvl.sys.setVisible) lvl.sys.setVisible(true); lvl.scene.restart(); }
     } catch (e) { console.warn('[LEVELEND-BRIDGE] restart', e); }
     hide();
   }
@@ -213,8 +213,16 @@
           if (typeof lm.timer.updateTime === 'function') lm.timer.updateTime();
           lm.GAMESTATE = 'play';
           try { lm.scene.input.enabled = true; } catch (e) {}
-          hidePhaser(false);
           try { gm.scene.stop('LevelEnd'); } catch (e) {}
+          // BUGFIX congelamento: durante o ad o jogo auto-pausa a cena (visibilitychange
+          // nativo). Sem um resume explicito, a cena volta PAUSADA -> tela travada.
+          // Restaura visibilidade + resume da cena do jogo (e para um SettingsGame perdido).
+          try { if (gm.scene.isActive('SettingsGame')) gm.scene.stop('SettingsGame'); } catch (e) {}
+          try {
+            var cs = gm.scene.getScene(m);
+            if (cs && cs.sys && cs.sys.setVisible) cs.sys.setVisible(true);
+            gm.scene.resume(m);
+          } catch (e) {}
           hide();
           return;
         }
