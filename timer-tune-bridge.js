@@ -7,7 +7,7 @@
  * Aplica uma vez por timer criado (start e restart recriam o timer -> reaplica).
  */
 (function () {
-  var FROM_LEVEL = 15, CUT = 30, FLOOR = 45;
+  var FROM_LEVEL = 15, CUT = 50, FLOOR = 45;   // corte ampliado 30->50s (pedido: -20s extras)
   function g() { return window.__game; }
   setInterval(function () {
     try {
