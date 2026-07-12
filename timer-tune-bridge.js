@@ -30,51 +30,57 @@
     } catch (e) {}
   }, 200);
 
-  /* ---------- ALERTA VISUAL: o WIDGET do timer pisca em vermelho aos 15s finais ---------- */
-  var WARN_AT = 15, TINT = 0xff3b30;
-  var blinkOn = false, blinkPhase = false, savedTextColor = null;
+  /* ---------- ALERTA VISUAL: o WIDGET do timer pisca em vermelho aos 15s finais ----------
+     Robusto contra ofuscacao: varre TODAS as props do timer e coleta qualquer objeto
+     tingivel (setTint) ou texto (setColor), incluindo filhos de containers (.list). */
+  var WARN_AT = 15, TINT = 0xff3b30, TXT_RED = '#ff3b30';
+  var blinkPhase = false;
 
-  function timerParts(t) {
-    // reune tudo que da pra tingir: filhos do container do timer + o texto
-    var sprites = [];
-    try {
-      var box = t.container || t;
-      if (box && box.list && box.list.length) {
-        box.list.forEach(function (o) { if (o && typeof o.setTint === 'function') sprites.push(o); });
-      }
-      ['frame', 'icon', 'image', 'bg'].forEach(function (k) {
-        if (t[k] && typeof t[k].setTint === 'function' && sprites.indexOf(t[k]) < 0) sprites.push(t[k]);
-      });
-    } catch (e) {}
-    return { sprites: sprites, text: (t.text && typeof t.text.setColor === 'function') ? t.text : null };
+  function collect(t) {
+    var sprites = [], texts = [];
+    function grab(o) {
+      if (!o || typeof o !== 'object') return;
+      if (typeof o.setColor === 'function' && o.style) { if (texts.indexOf(o) < 0) texts.push(o); return; }
+      if (typeof o.setTint === 'function') { if (sprites.indexOf(o) < 0) sprites.push(o); }
+      if (o.list && o.list.length) o.list.forEach(grab);       // containers
+    }
+    try { Object.keys(t).forEach(function (k) { grab(t[k]); }); } catch (e) {}
+    return { sprites: sprites, texts: texts };
   }
 
   function applyBlink(t, on) {
-    var p = timerParts(t);
-    if (on && blinkPhase) {
-      p.sprites.forEach(function (o) { try { o.setTint(TINT); } catch (e) {} });
-      if (p.text) { if (savedTextColor === null) savedTextColor = p.text.style && p.text.style.color; try { p.text.setColor('#ff3b30'); } catch (e) {} }
-    } else {
-      p.sprites.forEach(function (o) { try { o.clearTint(); } catch (e) {} });
-      if (p.text && savedTextColor !== null) { try { p.text.setColor(savedTextColor); } catch (e) {} }
-      if (!on) savedTextColor = null;
-    }
+    var p = t.__parts || (t.__parts = collect(t));
+    var red = on && blinkPhase;
+    p.sprites.forEach(function (o) {
+      try { red ? o.setTint(TINT) : o.clearTint(); } catch (e) {}
+    });
+    p.texts.forEach(function (o) {
+      try {
+        if (o.__origColor === undefined) o.__origColor = (o.style && o.style.color) || '#4a4060';
+        o.setColor(red ? TXT_RED : o.__origColor);
+      } catch (e) {}
+    });
+  }
+
+  function scenePaused(gm, n) {
+    try { if (typeof gm.scene.isPaused === 'function') return gm.scene.isPaused(n); } catch (e) {}
+    try { var sc = gm.scene.getScene(n); return !!(sc && sc.sys && sc.sys.isPaused && sc.sys.isPaused()); } catch (e) {}
+    return false;
   }
 
   setInterval(function () {
     try {
       var gm = g();
       if (!gm || !gm.scene) return;
-      blinkPhase = !blinkPhase;                          // alterna a cada tick (400ms)
+      blinkPhase = !blinkPhase;
       ['Game', 'LevelTutorial'].forEach(function (n) {
-        if (!gm.scene.isActive(n)) return;
-        var sc = gm.scene.getScene(n);
+        var sc;
+        try { if (!gm.scene.isActive(n)) return; sc = gm.scene.getScene(n); } catch (e) { return; }
         var t = sc && sc.LevelManager && sc.LevelManager.timer;
         if (!t) return;
-        var on = !gm.scene.isPaused(n) &&
+        var on = !scenePaused(gm, n) &&
                  typeof t.timeLeft === 'number' && t.timeLeft > 0 && t.timeLeft <= WARN_AT;
         applyBlink(t, on);
-        blinkOn = on;
       });
     } catch (e) {}
   }, 400);
