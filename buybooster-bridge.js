@@ -148,7 +148,7 @@
     try {
       var gm = g();
       try { gm.scene.stop('BuyBooster'); } catch (e) {}
-      var target = ck || 'Game';
+      var target = ck || 'Level';
       try {
         var cs = gm.scene.getScene(target);
         if (cs && cs.sys) {
@@ -161,7 +161,7 @@
       } catch (e) {}
       // rede de seguranca: garante que nenhuma cena de jogo fique invisivel
       try {
-        ['Game', 'LevelTutorial'].forEach(function (n) {
+        ['Level', 'LevelTutorial'].forEach(function (n) {
           if (gm.scene.isActive(n)) {
             var s2 = gm.scene.getScene(n);
             if (s2 && s2.sys && s2.sys.setVisible) s2.sys.setVisible(true);

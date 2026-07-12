@@ -77,13 +77,13 @@
 
     var origStart = proto.start;
     proto.start = function (key, data) {
-      if (key === 'Game') shuffleLevel(currentLevel());
+      if (key === 'Level') shuffleLevel(currentLevel());
       return origStart.call(this, key, data);
     };
     if (typeof proto.restart === 'function') {
       var origRestart = proto.restart;
       proto.restart = function (data) {
-        try { if (this.scene && this.scene.sys && this.scene.sys.settings && this.scene.sys.settings.key === 'Game') shuffleLevel(currentLevel()); } catch (e) {}
+        try { if (this.scene && this.scene.sys && this.scene.sys.settings && this.scene.sys.settings.key === 'Level') shuffleLevel(currentLevel()); } catch (e) {}
         return origRestart.call(this, data);
       };
     }

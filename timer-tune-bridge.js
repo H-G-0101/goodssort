@@ -12,7 +12,7 @@
   setInterval(function () {
     try {
       var gm = g(); if (!gm || !gm.scene) return;
-      ['Game', 'LevelTutorial'].forEach(function (n) {
+      ['Level', 'LevelTutorial'].forEach(function (n) {
         if (!gm.scene.isActive(n)) return;
         var sc = gm.scene.getScene(n);
         var LM = sc && sc.LevelManager;
@@ -73,7 +73,7 @@
       var gm = g();
       if (!gm || !gm.scene) return;
       blinkPhase = !blinkPhase;
-      ['Game', 'LevelTutorial'].forEach(function (n) {
+      ['Level', 'LevelTutorial'].forEach(function (n) {
         var sc;
         try { if (!gm.scene.isActive(n)) return; sc = gm.scene.getScene(n); } catch (e) { return; }
         var t = sc && sc.LevelManager && sc.LevelManager.timer;

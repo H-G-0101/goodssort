@@ -56,18 +56,29 @@
       row((window.__saves||0) > 0, 'saves feitos', String(window.__saves || 0)) +
       row(window.__saveOk === 'MATCH', 'save verify', (window.__saveOk || '-') + (window.__saveBytes ? (' ' + window.__saveBytes + 'b') : '')) +
       row(window.__saveErr ? false : null, 'save error', window.__saveErr || 'none') +
+      row(null, 'CENAS', (function () {
+        try {
+          var gm = window.__game;
+          return gm.scene.scenes.map(function (sc) {
+            var k = sc.sys.settings.key;
+            var a = ''; try { if (gm.scene.isActive(k)) a = '*'; } catch (e) {}
+            var lm = sc.LevelManager ? '+LM' : '';
+            return k + a + lm;
+          }).join(' ');
+        } catch (e) { return 'err'; }
+      })()) +
       row(null, 'Game keys', (function () {
         try {
           var gm = window.__game;
-          if (!gm || !gm.scene.isActive('Game')) return 'cena inativa';
-          var sc = gm.scene.getScene('Game');
+          if (!gm || !gm.scene.isActive('Level')) return 'cena inativa';
+          var sc = gm.scene.getScene('Level');
           return Object.keys(sc).filter(function (k) { return !/^(sys|game|scene|children|data|events|cameras|add|make|input|load|time|tweens|anims|cache|registry|textures|sound|plugins|renderer|physics|lights)$/.test(k); }).join(',').slice(0, 90);
         } catch (e) { return 'err'; }
       })()) +
       row(null, 'LM keys', (function () {
         try {
           var gm = window.__game;
-          var sc = gm.scene.getScene('Game');
+          var sc = gm.scene.getScene('Level');
           var lm = sc && sc.LevelManager;
           if (!lm) return 'LevelManager AUSENTE';
           return Object.keys(lm).join(',').slice(0, 90);
@@ -76,7 +87,7 @@
       row(null, 'timer info', (function () {
         try {
           var gm = window.__game;
-          var sc = gm.scene.getScene('Game');
+          var sc = gm.scene.getScene('Level');
           var lm = sc && sc.LevelManager;
           var t = lm && lm.timer;
           if (!t) return 'timer AUSENTE';

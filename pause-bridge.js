@@ -73,7 +73,7 @@
   function restoreGame(fw) {
     var gm = g(); if (!gm) return;
     var targets = fw ? [fw] : [];
-    ['Game', 'LevelTutorial'].forEach(function (n) { if (targets.indexOf(n) < 0) targets.push(n); });
+    ['Level', 'LevelTutorial'].forEach(function (n) { if (targets.indexOf(n) < 0) targets.push(n); });
     targets.forEach(function (n) {
       try {
         var sc = gm.scene.getScene(n);
@@ -151,7 +151,7 @@
       if (isAutoPause()) {
         // pause automatico (ad / app em background): fecha a cena e retoma, sem overlay
         try { gm.scene.stop('SettingsGame'); } catch (e) {}
-        ['Game', 'LevelTutorial'].forEach(function (n) {
+        ['Level', 'LevelTutorial'].forEach(function (n) {
           try {
             if (gm.scene.getScene(n)) {
               var s2 = gm.scene.getScene(n);
