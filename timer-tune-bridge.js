@@ -6,13 +6,14 @@
  * pressao do relogio nunca sobe sozinha (fica ~1,95s por peca da fase 16 a 120).
  * Por isso cortamos o tempo inicial em DEGRAUS:
  *   fases  1-14 : sem corte (aprendizado)
- *   fases 15-35 : -50s
- *   fases 36+   : -70s   (-20s a mais; jogador passava sem usar booster)
+ *   fases 15-24 : -50s
+ *   fases 25-35 : -70s
+ *   fases 36+   : -90s   (ainda estava facil sem booster; -20s extras da fase 25 p/ cima)
  * Piso de seguranca de 45s. Aplica uma vez por timer criado (start/restart recriam).
  */
 (function () {
   // degraus de corte: {a partir da fase, segundos a cortar} - do maior para o menor
-  var TIERS = [ { from: 36, cut: 70 }, { from: 15, cut: 50 } ];
+  var TIERS = [ { from: 36, cut: 90 }, { from: 25, cut: 70 }, { from: 15, cut: 50 } ];
   var FLOOR = 45;
   function cutFor(lvl) {
     for (var i = 0; i < TIERS.length; i++) { if (lvl >= TIERS[i].from) return TIERS[i].cut; }
@@ -95,5 +96,5 @@
       });
     } catch (e) {}
   }, 400);
-  console.log('[TIMER-TUNE] ativo (degraus: -50s da fase 15, -70s da fase 36).');
+  console.log('[TIMER-TUNE] ativo (degraus: -50s da fase 15, -70s da 25, -90s da 36).');
 })();
