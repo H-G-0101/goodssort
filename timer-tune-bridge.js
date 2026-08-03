@@ -2,12 +2,22 @@
  * timer-tune-bridge.js - ajuste de dificuldade do TEMPO.
  *
  * O bundle calcula o tempo inicial como clamp(60s, 300s, tileCount*2.5).
- * A pedido: a partir da FASE 15, reduzimos 30s do tempo inicial (o jogador
- * estava vencendo folgado sem usar boosters). Piso de seguranca de 45s.
- * Aplica uma vez por timer criado (start e restart recriam o timer -> reaplica).
+ * Como o tempo nasce do numero de pecas, nivel maior ganha tempo proporcional e a
+ * pressao do relogio nunca sobe sozinha (fica ~1,95s por peca da fase 16 a 120).
+ * Por isso cortamos o tempo inicial em DEGRAUS:
+ *   fases  1-14 : sem corte (aprendizado)
+ *   fases 15-35 : -50s
+ *   fases 36+   : -70s   (-20s a mais; jogador passava sem usar booster)
+ * Piso de seguranca de 45s. Aplica uma vez por timer criado (start/restart recriam).
  */
 (function () {
-  var FROM_LEVEL = 15, CUT = 50, FLOOR = 45;   // corte ampliado 30->50s (pedido: -20s extras)
+  // degraus de corte: {a partir da fase, segundos a cortar} - do maior para o menor
+  var TIERS = [ { from: 36, cut: 70 }, { from: 15, cut: 50 } ];
+  var FLOOR = 45;
+  function cutFor(lvl) {
+    for (var i = 0; i < TIERS.length; i++) { if (lvl >= TIERS[i].from) return TIERS[i].cut; }
+    return 0;
+  }
   function g() { return window.__game; }
   setInterval(function () {
     try {
@@ -21,9 +31,10 @@
         timer.__tuned = 1;
         var lvl = 0;
         try { lvl = gm.data.stats.currentCommonLevel || 0; } catch (e) {}
-        if (lvl >= FROM_LEVEL && typeof timer.timeLeft === 'number') {
+        var cut = cutFor(lvl);
+        if (cut > 0 && typeof timer.timeLeft === 'number') {
           var before = timer.timeLeft;
-          timer.timeLeft = Math.max(FLOOR, timer.timeLeft - CUT);
+          timer.timeLeft = Math.max(FLOOR, timer.timeLeft - cut);
           console.log('[TIMER-TUNE] fase ' + lvl + ': ' + before + 's -> ' + timer.timeLeft + 's (-' + (before - timer.timeLeft) + ')');
         }
       });
@@ -84,5 +95,5 @@
       });
     } catch (e) {}
   }, 400);
-  console.log('[TIMER-TUNE] ativo (-' + CUT + 's a partir da fase ' + FROM_LEVEL + ').');
+  console.log('[TIMER-TUNE] ativo (degraus: -50s da fase 15, -70s da fase 36).');
 })();
